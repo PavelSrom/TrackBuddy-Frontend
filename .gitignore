@@ -10,9 +10,6 @@ firebase.json
 /.pnp
 .pnp.js
 
-# security
-/src/api/config.ts
-
 # testing
 /coverage
 
