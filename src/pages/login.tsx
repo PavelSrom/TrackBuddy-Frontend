@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
@@ -18,6 +18,15 @@ const useStyles = makeStyles<Theme>(theme => ({
   pageTitle: {
     marginTop: theme.spacing(6),
     marginBottom: theme.spacing(6),
+  },
+  links: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginTop: theme.spacing(30),
+  },
+  link: {
+    textDecoration: 'none',
+    color: theme.palette.common.black,
   },
 }))
 
@@ -86,6 +95,25 @@ export const LoginPage: React.FC = () => {
           </Button>
         </Form>
       </Formik>
+
+      <div className={classes.links}>
+        <Typography
+          variant="body2"
+          className={classes.link}
+          component={Link}
+          to="/password-reset"
+        >
+          Forgot password?
+        </Typography>
+        <Typography
+          variant="body2"
+          className={classes.link}
+          component={Link}
+          to="/register"
+        >
+          No account?
+        </Typography>
+      </div>
     </Container>
   )
 }
