@@ -57,6 +57,7 @@ export const NewJournalPage: React.FC = () => {
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
 
   const handleSubmit = (values: JournalFullASP): void => {
+    // eslint-disable-next-line
     console.log(values)
   }
 

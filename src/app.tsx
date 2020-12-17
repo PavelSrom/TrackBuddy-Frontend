@@ -9,6 +9,9 @@ import { ForgotPasswordPage } from './pages/forgot-password'
 import { ActionsPage } from './pages/actions'
 import { DashboardPage } from './pages/dashboard'
 import { NewJournalPage } from './pages/new-journal'
+import { JournalsPage } from './pages/journals'
+import { PlannerPage } from './pages/planner'
+import { HabitsPage } from './pages/habits'
 
 export const App: React.FC = () => {
   return (
@@ -19,6 +22,9 @@ export const App: React.FC = () => {
       <Route path="/password-reset" element={<ForgotPasswordPage />} />
       <PrivateRoute path="/actions" element={<ActionsPage />} />
       <PrivateRoute path="/dashboard" element={<DashboardPage />} />
+      <PrivateRoute path="/habits" element={<HabitsPage />} />
+      <PrivateRoute path="/journals" element={<JournalsPage />} />
+      <PrivateRoute path="/planner" element={<PlannerPage />} />
       <PrivateRoute path="/journals/new" element={<NewJournalPage />} />
     </Routes>
   )

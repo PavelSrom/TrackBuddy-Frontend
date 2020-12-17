@@ -1,7 +1,8 @@
 import React from 'react'
-import { Route, Navigate } from 'react-router-dom'
+import { Route, Navigate, useLocation } from 'react-router-dom'
 import { Container } from '@material-ui/core'
 import { useAuth } from '../contexts/auth'
+import { BottomNavigation } from '../components/bottom-navigation'
 
 type Props = {
   path: string
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export const PrivateRoute: React.FC<Props> = ({ element, ...rest }) => {
+  const location = useLocation()
   const { isAuthenticated } = useAuth()
 
   return (
@@ -16,12 +18,16 @@ export const PrivateRoute: React.FC<Props> = ({ element, ...rest }) => {
       {...rest}
       element={
         isAuthenticated ? (
-          <Container
-            maxWidth="xs"
-            className="bg-gray-100 w-screen h-screen absolute top-0 right-0 bottom-0 left-0"
-          >
-            {element}
-          </Container>
+          <>
+            <Container
+              maxWidth="xs"
+              className="bg-gray-100 w-screen h-screen absolute top-0 right-0 bottom-0 left-0"
+            >
+              {element}
+            </Container>
+
+            {location.pathname !== '/actions' && <BottomNavigation />}
+          </>
         ) : (
           <Navigate to="/login" />
         )

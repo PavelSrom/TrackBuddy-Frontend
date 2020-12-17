@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* because of MUI bottom navigation button focus */
+button:focus {
+  outline: none;
+}
