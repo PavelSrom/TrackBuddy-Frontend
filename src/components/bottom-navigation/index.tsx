@@ -4,16 +4,17 @@ import {
   BottomNavigation as MUINavigation,
   BottomNavigationAction,
 } from '@material-ui/core'
-import { NavigationLink } from '../../types/navigation-item'
 import { appNavigation } from '../../utils/navigation'
 
 export const BottomNavigation: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState<NavigationLink>('/dashboard')
+  const [currentPage, setCurrentPage] = useState<number>(0)
 
   useEffect(() => {
-    setCurrentPage(location.pathname as NavigationLink)
+    setCurrentPage(
+      appNavigation.findIndex(item => item.value === location.pathname)
+    )
   }, [location.pathname])
 
   return (
