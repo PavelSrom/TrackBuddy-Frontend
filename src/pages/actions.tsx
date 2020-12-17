@@ -1,23 +1,10 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { makeStyles, Theme, Typography, Paper, Slide } from '@material-ui/core'
+import { Paper, Slide } from '@material-ui/core'
 import { actions } from '../utils/actions'
 import { PageTitle } from '../styleguide/page-title'
 
-const useStyles = makeStyles<Theme>(theme => ({
-  paper: {
-    padding: theme.spacing(2),
-    width: '100%',
-    marginTop: theme.spacing(3),
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    color: '#fff',
-  },
-}))
-
 export const ActionsPage: React.FC = () => {
-  const classes = useStyles()
   const navigate = useNavigate()
 
   return (
@@ -28,10 +15,10 @@ export const ActionsPage: React.FC = () => {
         <Slide key={url} direction="right" in timeout={(index + 1) * 250}>
           <Paper
             onClick={() => (enabled ? navigate(url) : null)}
-            className={classes.paper}
+            className="p-4 mt-6 w-full flex justify-between items-center text-white"
             style={{ background: gradient, opacity: enabled ? 1 : 0.5 }}
           >
-            <Typography variant="h6">{label}</Typography>
+            <p className="text-xl font-semibold">{label}</p>
             <Icon />
           </Paper>
         </Slide>

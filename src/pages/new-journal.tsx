@@ -2,7 +2,6 @@ import React from 'react'
 import dayjs from 'dayjs'
 import { Formik, Form } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { Typography } from '@material-ui/core'
 import { Rating } from '@material-ui/lab'
 import SentimentVeryDissatisfied from '@material-ui/icons/SentimentVeryDissatisfied'
 import SentimentDissatisfied from '@material-ui/icons/SentimentDissatisfied'
@@ -68,9 +67,7 @@ export const NewJournalPage: React.FC = () => {
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, setFieldValue }) => (
           <Form>
-            <Typography variant="h6" style={{ marginTop: 32 }}>
-              How do you feel?
-            </Typography>
+            <p className="text-2xl font-semibold mt-8">How do you feel?</p>
             <Rating
               name="mood"
               onChange={(_e, newValue) => {
@@ -86,9 +83,9 @@ export const NewJournalPage: React.FC = () => {
 
             <button type="submit">submit</button>
 
-            <Typography variant="h6" style={{ marginTop: 32 }}>
+            <p className="text-2xl font-semibold mt-8">
               What stood out during the day?
-            </Typography>
+            </p>
           </Form>
         )}
       </Formik>

@@ -4,31 +4,10 @@ import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
 import { LoginASP } from 'trackbuddy-shared/payloads/auth'
-import {
-  makeStyles,
-  Theme,
-  Container,
-  Typography,
-  Button,
-} from '@material-ui/core'
+import { Container, Typography, Button } from '@material-ui/core'
 import { TextField } from '../styleguide/text-field'
 import { useAuth } from '../contexts/auth'
-
-const useStyles = makeStyles<Theme>(theme => ({
-  pageTitle: {
-    marginTop: theme.spacing(6),
-    marginBottom: theme.spacing(6),
-  },
-  links: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(30),
-  },
-  link: {
-    textDecoration: 'none',
-    color: theme.palette.common.black,
-  },
-}))
+import { PageTitle } from '../styleguide/page-title'
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email('must be an email').required('required'),
@@ -45,7 +24,6 @@ const initialValues: LoginASP = {
 
 // TODO: make a styleguide Button that merges 'Button' and 'LoadingButton'
 export const LoginPage: React.FC = () => {
-  const classes = useStyles()
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState<boolean>(false)
   const { isAuthenticated, loginUser } = useAuth()
@@ -65,9 +43,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <Container maxWidth="xs">
-      <Typography variant="h4" className={classes.pageTitle}>
-        Sign into your account
-      </Typography>
+      <PageTitle className="mb-12">Sign in to your account</PageTitle>
 
       <Formik
         initialValues={initialValues}
@@ -96,10 +72,10 @@ export const LoginPage: React.FC = () => {
         </Form>
       </Formik>
 
-      <div className={classes.links}>
+      <div className="flex justify-between mt-40">
         <Typography
           variant="body2"
-          className={classes.link}
+          className="text-black no-underline"
           component={Link}
           to="/password-reset"
         >
@@ -107,7 +83,7 @@ export const LoginPage: React.FC = () => {
         </Typography>
         <Typography
           variant="body2"
-          className={classes.link}
+          className="text-black no-underline"
           component={Link}
           to="/register"
         >
