@@ -3,11 +3,11 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ThemeProvider } from '@material-ui/core'
 import { SnackbarProvider } from 'notistack'
-import './index.css'
 import { App } from './app'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { AuthProvider } from './contexts/auth'
 import { theme } from './utils/theme'
+import './index.css'
 
 require('./utils/axios-interceptor')
 
