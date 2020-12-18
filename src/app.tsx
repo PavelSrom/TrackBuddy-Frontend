@@ -12,6 +12,7 @@ import { NewJournalPage } from './pages/new-journal'
 import { JournalsPage } from './pages/journals'
 import { PlannerPage } from './pages/planner'
 import { HabitsPage } from './pages/habits'
+import { ChartsPage } from './pages/charts'
 
 export const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
       <PrivateRoute path="/actions" element={<ActionsPage />} />
       <PrivateRoute path="/dashboard" element={<DashboardPage />} />
       <PrivateRoute path="/habits" element={<HabitsPage />} />
+      <PrivateRoute path="/charts" element={<ChartsPage />} />
       <PrivateRoute path="/journals" element={<JournalsPage />} />
       <PrivateRoute path="/planner" element={<PlannerPage />} />
       <PrivateRoute path="/journals/new" element={<NewJournalPage />} />
