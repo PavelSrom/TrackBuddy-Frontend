@@ -1,5 +1,8 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* because of MUI bottom navigation button focus */
+button:focus {
+  outline: none;
 }

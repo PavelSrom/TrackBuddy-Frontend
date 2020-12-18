@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@material-ui/core'
+import clsx from 'clsx'
 
 type Props = {
   className?: string
@@ -8,12 +8,8 @@ type Props = {
 
 export const PageTitle: React.FC<Props> = ({ className, style, children }) => {
   return (
-    <Typography
-      variant="h4"
-      className={className}
-      style={{ ...style, marginTop: 16 }}
-    >
+    <p className={clsx('mt-4 text-3xl font-normal', className)} style={style}>
       {children}
-    </Typography>
+    </p>
   )
 }

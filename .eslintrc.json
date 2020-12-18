@@ -30,7 +30,9 @@
       {
         "endOfLine": "auto"
       }
-    ],
+		],
+		"no-useless-computed-key": "off",
+		"no-underscore-dangle": "off",
     "react/jsx-props-no-spreading": "off",
     "react/prop-types": "off",
 		"react/no-array-index-key": "off",

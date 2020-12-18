@@ -22,6 +22,7 @@ export const TextField: React.FC<Props> = ({ noFormik, fast, ...rest }) => {
           {...rest}
           size="small"
           variant="outlined"
+          color="primary"
           error={!!meta.error}
           helperText={meta.error ?? ' '}
           FormHelperTextProps={{ style: { margin: `0 14px 8px 14px` } }}

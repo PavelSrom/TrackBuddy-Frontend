@@ -4,22 +4,10 @@ import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
 import { RegisterASP } from 'trackbuddy-shared/payloads/auth'
-import {
-  makeStyles,
-  Theme,
-  Container,
-  Typography,
-  Button,
-} from '@material-ui/core'
+import { Container, Button } from '@material-ui/core'
 import { TextField } from '../styleguide/text-field'
 import { useAuth } from '../contexts/auth'
-
-const useStyles = makeStyles<Theme>(theme => ({
-  pageTitle: {
-    marginTop: theme.spacing(6),
-    marginBottom: theme.spacing(6),
-  },
-}))
+import { PageTitle } from '../styleguide/page-title'
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required('required'),
@@ -40,7 +28,6 @@ const initialValues: RegisterASP = {
 
 // TODO: make a styleguide Button that merges 'Button' and 'LoadingButton'
 export const RegisterPage: React.FC = () => {
-  const classes = useStyles()
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState<boolean>(false)
   const { isAuthenticated, registerUser } = useAuth()
@@ -60,9 +47,7 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <Container maxWidth="xs">
-      <Typography variant="h4" className={classes.pageTitle}>
-        Create a new account
-      </Typography>
+      <PageTitle className="mb-12">Create a new account</PageTitle>
 
       <Formik
         initialValues={initialValues}
