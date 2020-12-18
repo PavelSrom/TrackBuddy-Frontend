@@ -5,15 +5,9 @@ import { TextField as MUITextField, TextFieldProps } from '@material-ui/core'
 type Props = TextFieldProps & {
   noFormik?: boolean
   fast?: boolean
-  noHelperTextGap?: boolean
 }
 
-export const TextField: React.FC<Props> = ({
-  noFormik,
-  fast,
-  noHelperTextGap,
-  ...rest
-}) => {
+export const TextField: React.FC<Props> = ({ noFormik, fast, ...rest }) => {
   const FieldComponent = fast ? FastField : Field
 
   // return a standard text field if 'noFormik' is provided
@@ -30,7 +24,7 @@ export const TextField: React.FC<Props> = ({
           variant="outlined"
           color="primary"
           error={!!meta.error}
-          helperText={meta.error ? meta.error : noHelperTextGap ? '' : ' '}
+          helperText={meta.error ?? ' '}
           FormHelperTextProps={{ style: { margin: `0 14px 8px 14px` } }}
         />
       )}

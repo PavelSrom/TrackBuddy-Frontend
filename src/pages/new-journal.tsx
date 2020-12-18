@@ -1,39 +1,17 @@
 import React from 'react'
 import dayjs from 'dayjs'
+import { useNavigate } from 'react-router-dom'
+import { useMutation } from 'react-query'
+import { useSnackbar } from 'notistack'
 import { Formik, Form } from 'formik'
+import * as Yup from 'yup'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
 import { Paper, Chip, MenuItem, Button } from '@material-ui/core'
 import { Rating } from '@material-ui/lab'
-import SentimentVeryDissatisfied from '@material-ui/icons/SentimentVeryDissatisfied'
-import SentimentDissatisfied from '@material-ui/icons/SentimentDissatisfied'
-import SentimentSatisfied from '@material-ui/icons/SentimentSatisfied'
-import SentimentSatisfiedAlt from '@material-ui/icons/SentimentSatisfiedAlt'
-import SentimentVerySatisfied from '@material-ui/icons/SentimentVerySatisfied'
+import { createNewJournal } from '../api/journals'
 import { PageTitle } from '../styleguide/page-title'
 import { TextField } from '../styleguide/text-field'
-
-const moodIcons: Record<number, { icon: React.ElementType; label: string }> = {
-  1: {
-    icon: SentimentVeryDissatisfied,
-    label: 'Awful',
-  },
-  2: {
-    icon: SentimentDissatisfied,
-    label: 'Bad',
-  },
-  3: {
-    icon: SentimentSatisfied,
-    label: 'Okay',
-  },
-  4: {
-    icon: SentimentSatisfiedAlt,
-    label: 'Good',
-  },
-  5: {
-    icon: SentimentVerySatisfied,
-    label: 'Great',
-  },
-}
+import { moodIcons } from '../utils/mood-icons'
 
 const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
   const { icon: Icon } = moodIcons[value]
@@ -44,6 +22,16 @@ const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
     </span>
   )
 }
+
+const validationSchema = Yup.object().shape({
+  mood: Yup.number().min(1).max(5).required('required'),
+  standout: Yup.string().required('required'),
+  wentWell: Yup.string().required('required'),
+  wentWrong: Yup.string().required('required'),
+  betterNextTime: Yup.string().required('required'),
+  excuses: Yup.string(),
+  tags: Yup.array().of(Yup.string()),
+})
 
 const initialValues: JournalFullASP = {
   mood: 3,
@@ -56,18 +44,38 @@ const initialValues: JournalFullASP = {
 }
 
 export const NewJournalPage: React.FC = () => {
+  const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
+
+  const [submitEntry] = useMutation(createNewJournal, {
+    onSuccess: () => {
+      navigate('/journals')
+      enqueueSnackbar('Journal entry created', { variant: 'success' })
+    },
+    onError: err => {
+      console.log(err)
+      enqueueSnackbar('Cannot submit journal entry', { variant: 'error' })
+    },
+  })
 
   const handleSubmit = (values: JournalFullASP): void => {
     // eslint-disable-next-line
     console.log(values)
+    submitEntry(values)
   }
 
   return (
     <>
-      <PageTitle>Today, {todayDate}</PageTitle>
+      <PageTitle className="mb-6">Today, {todayDate}</PageTitle>
 
-      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+      <Formik
+        initialValues={initialValues}
+        onSubmit={handleSubmit}
+        validateOnChange={false}
+        validateOnBlur={false}
+        validationSchema={validationSchema}
+      >
         {({ values, setFieldValue }) => (
           <Form>
             {/* mood */}
@@ -100,7 +108,6 @@ export const NewJournalPage: React.FC = () => {
                 fullWidth
                 multiline
                 placeholder="Type something..."
-                noHelperTextGap
               />
             </Paper>
 
@@ -112,7 +119,6 @@ export const NewJournalPage: React.FC = () => {
                 fullWidth
                 multiline
                 placeholder="Type something..."
-                noHelperTextGap
               />
             </Paper>
 
@@ -124,7 +130,6 @@ export const NewJournalPage: React.FC = () => {
                 fullWidth
                 multiline
                 placeholder="Type something..."
-                noHelperTextGap
               />
             </Paper>
 
@@ -138,7 +143,6 @@ export const NewJournalPage: React.FC = () => {
                 fullWidth
                 multiline
                 placeholder="Type something..."
-                noHelperTextGap
               />
             </Paper>
 
@@ -150,7 +154,6 @@ export const NewJournalPage: React.FC = () => {
                 fullWidth
                 multiline
                 placeholder="Type something... (optional)"
-                noHelperTextGap
               />
             </Paper>
 
