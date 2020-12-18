@@ -40,7 +40,7 @@ const initialValues: JournalFullASP = {
   wentWrong: '',
   betterNextTime: '',
   excuses: '',
-  tags: ['one', 'two'],
+  tags: [],
 }
 
 export const NewJournalPage: React.FC = () => {
@@ -67,7 +67,7 @@ export const NewJournalPage: React.FC = () => {
 
   return (
     <>
-      <PageTitle className="mb-6">Today, {todayDate}</PageTitle>
+      <PageTitle className="mb-6">{todayDate}</PageTitle>
 
       <Formik
         initialValues={initialValues}
