@@ -19,7 +19,7 @@ export const BottomNavigation: React.FC = () => {
 
   return (
     <MUINavigation
-      className="w-screen fixed bottom-0 left-0 right-0 z-50 focus:border-transparent"
+      className="w-screen fixed bottom-0 left-0 right-0 z-50"
       value={currentPage}
       onChange={(_event, newValue) => {
         setCurrentPage(newValue)
