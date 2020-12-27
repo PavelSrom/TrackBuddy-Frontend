@@ -8,7 +8,7 @@ type Props = {
 
 export const PageTitle: React.FC<Props> = ({ className, style, children }) => {
   return (
-    <p className={clsx('mt-4 text-3xl font-normal', className)} style={style}>
+    <p className={clsx('text-3xl font-normal', className)} style={style}>
       {children}
     </p>
   )

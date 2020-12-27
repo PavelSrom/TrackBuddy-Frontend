@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import {
   Drawer,
   Divider,
@@ -8,6 +8,7 @@ import {
   Checkbox,
 } from '@material-ui/core'
 import { TextField } from '../../styleguide/text-field'
+import { Filters } from '../../utils/journal-filters'
 
 const months: string[] = [
   'January',
@@ -28,12 +29,19 @@ const years = [2020, 2021]
 type Props = {
   open: boolean
   onClose: () => void
+  onReset: () => void
+  filters: Filters
+  setFilters: Dispatch<SetStateAction<Filters>>
 }
 
-export const JournalsFilter: React.FC<Props> = ({ open, onClose }) => {
-  const [month, setMonth] = useState<number>(new Date().getMonth())
-  const [year, setYear] = useState<number>(new Date().getFullYear())
-
+export const JournalsFilter: React.FC<Props> = ({
+  open,
+  onClose,
+  onReset,
+  filters,
+  setFilters,
+}) => {
+  console.log(filters)
   return (
     <Drawer
       anchor="top"
@@ -46,14 +54,26 @@ export const JournalsFilter: React.FC<Props> = ({ open, onClose }) => {
       <div className="mb-6 px-4">
         <p className="text-xl font-semibold mb-2">Filter</p>
         <div className="grid grid-cols-2 gap-4">
-          <TextField noFormik select label="Month">
+          <TextField
+            noFormik
+            select
+            value={filters.month}
+            onChange={e => setFilters({ ...filters, month: +e.target.value })}
+            label="Month"
+          >
             {months.map((_month, index) => (
               <MenuItem key={_month} value={index}>
                 {_month}
               </MenuItem>
             ))}
           </TextField>
-          <TextField noFormik select label="Year">
+          <TextField
+            noFormik
+            select
+            value={filters.year}
+            onChange={e => setFilters({ ...filters, year: +e.target.value })}
+            label="Year"
+          >
             {years.map(_year => (
               <MenuItem key={_year} value={_year}>
                 {_year}
@@ -62,14 +82,29 @@ export const JournalsFilter: React.FC<Props> = ({ open, onClose }) => {
           </TextField>
         </div>
         <FormControlLabel
-          control={<Checkbox checked color="primary" />}
+          control={
+            <Checkbox
+              checked={filters.favorites}
+              onChange={(_e, checked) =>
+                setFilters({ ...filters, favorites: checked })
+              }
+              color="primary"
+            />
+          }
           label="Favorite journals"
         />
       </div>
 
       <div className="mb-6 px-4">
         <p className="text-xl font-semibold mb-2">Sort</p>
-        <TextField noFormik fullWidth select label="Sort by">
+        <TextField
+          noFormik
+          fullWidth
+          select
+          value={filters.sortBy}
+          onChange={e => setFilters({ ...filters, sortBy: e.target.value })}
+          label="Sort by"
+        >
           <MenuItem value="newest">Newest</MenuItem>
           <MenuItem value="oldest">Oldest</MenuItem>
           <MenuItem value="mood_asc">Mood, ascending order</MenuItem>
@@ -79,7 +114,7 @@ export const JournalsFilter: React.FC<Props> = ({ open, onClose }) => {
 
       <Divider className="bg-black" />
       <div className="flex justify-between my-6 px-4">
-        <Button variant="outlined" color="primary">
+        <Button variant="outlined" color="primary" onClick={onReset}>
           Reset filters
         </Button>
         <Button variant="contained" color="secondary" onClick={onClose}>
