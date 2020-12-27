@@ -87,13 +87,13 @@ export const TopNavigation: React.FC = () => {
             <ListItem button key={value} className="pl-0">
               <div
                 className={clsx('flex items-center py-2', {
-                  ['text-green-400']: index !== currentPage,
+                  ['text-blue-400']: index !== currentPage,
                   ['text-red-400']: index === currentPage,
                 })}
               >
                 <ListItemIcon
                   className={clsx({
-                    ['text-green-400']: index !== currentPage,
+                    ['text-blue-400']: index !== currentPage,
                     ['text-red-400']: index === currentPage,
                   })}
                 >

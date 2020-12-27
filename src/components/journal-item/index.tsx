@@ -9,12 +9,12 @@ import { truncateText } from '../../utils/funcs'
 
 type Props = {
   journal: JournalBriefASR & {
-    createdAt: string
+    created: string
   }
 }
 
 export const JournalItem: React.FC<Props> = ({
-  journal: { mood, isStarred, standout, createdAt },
+  journal: { mood, isStarred, standout, created },
 }) => {
   const { icon: Icon } = moodIcons[mood]
   const StarIcon = isStarred ? Star : StarBorder
@@ -25,7 +25,7 @@ export const JournalItem: React.FC<Props> = ({
       <div className="pl-2 flex-1">
         <div className="flex justify-between items-center">
           <p className="text-base font-semibold">
-            {dayjs(new Date(createdAt)).format('D MMMM YYYY')}
+            {dayjs(new Date(created)).format('D MMMM YYYY')}
           </p>
           <IconButton size="small" edge="end">
             <StarIcon className="text-yellow-400" />

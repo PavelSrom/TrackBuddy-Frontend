@@ -12,6 +12,7 @@ import { createNewJournal } from '../api/journals'
 import { PageTitle } from '../styleguide/page-title'
 import { TextField } from '../styleguide/text-field'
 import { moodIcons } from '../utils/mood-icons'
+import { ErrorResponse } from '../types/error-response'
 
 const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
   const { icon: Icon } = moodIcons[value]
@@ -50,18 +51,17 @@ export const NewJournalPage: React.FC = () => {
 
   const [submitEntry] = useMutation(createNewJournal, {
     onSuccess: () => {
-      navigate('/journals')
       enqueueSnackbar('Journal entry created', { variant: 'success' })
     },
-    onError: err => {
-      console.log(err)
-      enqueueSnackbar('Cannot submit journal entry', { variant: 'error' })
+    onError: (err: ErrorResponse) => {
+      enqueueSnackbar(err.response.data.message, { variant: 'error' })
+    },
+    onSettled: () => {
+      navigate('/journals')
     },
   })
 
   const handleSubmit = (values: JournalFullASP): void => {
-    // eslint-disable-next-line
-    console.log(values)
     submitEntry(values)
   }
 

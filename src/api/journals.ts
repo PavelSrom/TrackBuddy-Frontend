@@ -9,6 +9,9 @@ import { API_CONFIG } from './config'
 export const getAllJournals = (): Promise<JournalBriefASR[]> =>
   axios.get(`${API_CONFIG.BASE_URL}/journals`).then(({ data }) => data)
 
+export const journalMadeToday = (): Promise<{ found: boolean }> =>
+  axios.get(`${API_CONFIG.BASE_URL}/journals/today`).then(({ data }) => data)
+
 export const getJournalById = (
   _: string,
   id: string
