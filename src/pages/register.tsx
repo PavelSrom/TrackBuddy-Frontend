@@ -1,10 +1,18 @@
 import React, { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
 import { RegisterASP } from 'trackbuddy-shared/payloads/auth'
-import { Container } from '@material-ui/core'
+import {
+  Container,
+  Typography,
+  IconButton,
+  InputAdornment,
+} from '@material-ui/core'
+import TrackChanges from '@material-ui/icons/TrackChanges'
+import Visibility from '@material-ui/icons/Visibility'
+import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { TextField } from '../styleguide/text-field'
 import { Button } from '../styleguide/button'
 import { useAuth } from '../contexts/auth'
@@ -30,6 +38,7 @@ const initialValues: RegisterASP = {
 export const RegisterPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false)
   const { isAuthenticated, registerUser } = useAuth()
 
   const handleSubmit = async (values: RegisterASP): Promise<void> => {
@@ -46,37 +55,70 @@ export const RegisterPage: React.FC = () => {
   if (isAuthenticated) return <Navigate to="/actions" />
 
   return (
-    <Container maxWidth="xs">
-      <PageTitle className="mb-12">Create a new account</PageTitle>
+    <section className="bg-white absolute w-screen h-screen">
+      <Container maxWidth="xs">
+        <div className="flex flex-col items-center mt-4 text-gray-800">
+          <TrackChanges className="text-9xl" />
+          <PageTitle className="mb-12 text-center">
+            Create a new account
+          </PageTitle>
+        </div>
 
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={handleSubmit}
-      >
-        <Form>
-          <TextField name="firstName" label="First name" fullWidth />
-          <TextField name="lastName" label="Last name" fullWidth />
-          <TextField name="email" label="Email" fullWidth />
-          <TextField
-            name="password"
-            label="Password"
-            type="password"
-            fullWidth
-          />
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          validateOnChange={false}
+          validateOnBlur={false}
+          onSubmit={handleSubmit}
+        >
+          <Form>
+            <TextField name="firstName" label="First name" fullWidth />
+            <TextField name="lastName" label="Last name" fullWidth />
+            <TextField name="email" label="Email" fullWidth />
+            <TextField
+              name="password"
+              label="Password"
+              type="password"
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      edge="end"
+                      onClick={() => setShowPassword(prev => !prev)}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-          <Button
-            loading={loading}
-            type="submit"
-            variant="contained"
+            <Button
+              loading={loading}
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="large"
+              fullWidth
+            >
+              Sign up
+            </Button>
+          </Form>
+        </Formik>
+
+        <div className="flex justify-end mt-4">
+          <Typography
+            variant="body2"
             color="primary"
+            className="no-underline"
+            component={Link}
+            to="/login"
           >
-            Sign up
-          </Button>
-        </Form>
-      </Formik>
-    </Container>
+            Have an account?
+          </Typography>
+        </div>
+      </Container>
+    </section>
   )
 }
