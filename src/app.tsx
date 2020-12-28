@@ -13,6 +13,7 @@ import { JournalsPage } from './pages/journals'
 import { PlannerPage } from './pages/planner'
 import { HabitsPage } from './pages/habits'
 import { ChartsPage } from './pages/charts'
+import { ViewJournalPage } from './pages/view-journal'
 
 export const App: React.FC = () => {
   return (
@@ -28,6 +29,7 @@ export const App: React.FC = () => {
       <PrivateRoute path="/journals" element={<JournalsPage />} />
       <PrivateRoute path="/planner" element={<PlannerPage />} />
       <PrivateRoute path="/journals/new" element={<NewJournalPage />} />
+      <PrivateRoute path="/journals/:id" element={<ViewJournalPage />} />
     </Routes>
   )
 }

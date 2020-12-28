@@ -1,17 +1,20 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from 'react-query'
+import { useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { Paper, Chip, MenuItem, Button } from '@material-ui/core'
+import { Paper, Chip, MenuItem } from '@material-ui/core'
 import { Rating } from '@material-ui/lab'
-import { createNewJournal } from '../api/journals'
+import { createNewJournal, undoJournalEntry } from '../api/journals'
 import { PageTitle } from '../styleguide/page-title'
+import { Button } from '../styleguide/button'
 import { TextField } from '../styleguide/text-field'
 import { moodIcons } from '../utils/mood-icons'
+import { ErrorResponse } from '../types/error-response'
+import { initialFilters } from '../utils/journal-filters'
 
 const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
   const { icon: Icon } = moodIcons[value]
@@ -45,29 +48,52 @@ const initialValues: JournalFullASP = {
 
 export const NewJournalPage: React.FC = () => {
   const navigate = useNavigate()
-  const { enqueueSnackbar } = useSnackbar()
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
 
-  const [submitEntry] = useMutation(createNewJournal, {
+  const [undo] = useMutation(undoJournalEntry, {
     onSuccess: () => {
-      navigate('/journals')
-      enqueueSnackbar('Journal entry created', { variant: 'success' })
+      queryCache.refetchQueries(['allJournals', initialFilters])
+      queryCache.invalidateQueries('journalMadeToday')
     },
-    onError: err => {
-      console.log(err)
-      enqueueSnackbar('Cannot submit journal entry', { variant: 'error' })
+    onError: (err: ErrorResponse) => {
+      enqueueSnackbar(err.response.data.message, { variant: 'error' })
+    },
+  })
+
+  const [submitEntry, { status }] = useMutation(createNewJournal, {
+    onSuccess: ({ _id }) => {
+      enqueueSnackbar('Journal entry created', {
+        variant: 'success',
+        action: key => (
+          <Button
+            variant="text"
+            color="secondary"
+            onClick={async () => {
+              await undo(_id)
+              closeSnackbar(key)
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      })
+    },
+    onError: (err: ErrorResponse) => {
+      enqueueSnackbar(err.response.data.message, { variant: 'error' })
+    },
+    onSettled: () => {
+      navigate('/journals')
     },
   })
 
   const handleSubmit = (values: JournalFullASP): void => {
-    // eslint-disable-next-line
-    console.log(values)
     submitEntry(values)
   }
 
   return (
     <>
-      <PageTitle className="mb-6">{todayDate}</PageTitle>
+      <PageTitle className="mt-4 mb-6">{todayDate}</PageTitle>
 
       <Formik
         initialValues={initialValues}
@@ -199,6 +225,7 @@ export const NewJournalPage: React.FC = () => {
             </Paper>
 
             <Button
+              loading={status === 'loading'}
               type="submit"
               variant="contained"
               color="primary"
