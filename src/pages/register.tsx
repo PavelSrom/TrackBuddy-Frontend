@@ -4,8 +4,9 @@ import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
 import { RegisterASP } from 'trackbuddy-shared/payloads/auth'
-import { Container, Button } from '@material-ui/core'
+import { Container } from '@material-ui/core'
 import { TextField } from '../styleguide/text-field'
+import { Button } from '../styleguide/button'
 import { useAuth } from '../contexts/auth'
 import { PageTitle } from '../styleguide/page-title'
 
@@ -26,7 +27,6 @@ const initialValues: RegisterASP = {
   password: '',
 }
 
-// TODO: make a styleguide Button that merges 'Button' and 'LoadingButton'
 export const RegisterPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState<boolean>(false)
@@ -68,7 +68,7 @@ export const RegisterPage: React.FC = () => {
           />
 
           <Button
-            disabled={loading}
+            loading={loading}
             type="submit"
             variant="contained"
             color="primary"

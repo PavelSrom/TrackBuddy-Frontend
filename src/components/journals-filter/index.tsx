@@ -2,12 +2,12 @@ import React, { Dispatch, SetStateAction } from 'react'
 import {
   Drawer,
   Divider,
-  Button,
   MenuItem,
   FormControlLabel,
   Checkbox,
 } from '@material-ui/core'
 import { TextField } from '../../styleguide/text-field'
+import { Button } from '../../styleguide/button'
 import { Filters } from '../../utils/journal-filters'
 
 const months: string[] = [

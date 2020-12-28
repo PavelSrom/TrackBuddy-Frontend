@@ -4,10 +4,11 @@ import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useSnackbar } from 'notistack'
 import { LoginASP } from 'trackbuddy-shared/payloads/auth'
-import { Container, Typography, Button } from '@material-ui/core'
+import { Container, Typography } from '@material-ui/core'
 import { TextField } from '../styleguide/text-field'
-import { useAuth } from '../contexts/auth'
+import { Button } from '../styleguide/button'
 import { PageTitle } from '../styleguide/page-title'
+import { useAuth } from '../contexts/auth'
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email('must be an email').required('required'),
@@ -22,7 +23,6 @@ const initialValues: LoginASP = {
   password: '',
 }
 
-// TODO: make a styleguide Button that merges 'Button' and 'LoadingButton'
 export const LoginPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState<boolean>(false)
@@ -62,7 +62,7 @@ export const LoginPage: React.FC = () => {
           />
 
           <Button
-            disabled={loading}
+            loading={loading}
             type="submit"
             variant="contained"
             color="primary"

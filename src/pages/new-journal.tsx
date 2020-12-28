@@ -6,10 +6,11 @@ import { useSnackbar } from 'notistack'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { Paper, Chip, MenuItem, Button } from '@material-ui/core'
+import { Paper, Chip, MenuItem } from '@material-ui/core'
 import { Rating } from '@material-ui/lab'
 import { createNewJournal } from '../api/journals'
 import { PageTitle } from '../styleguide/page-title'
+import { Button } from '../styleguide/button'
 import { TextField } from '../styleguide/text-field'
 import { moodIcons } from '../utils/mood-icons'
 import { ErrorResponse } from '../types/error-response'
@@ -49,7 +50,7 @@ export const NewJournalPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
 
-  const [submitEntry] = useMutation(createNewJournal, {
+  const [submitEntry, { status }] = useMutation(createNewJournal, {
     onSuccess: () => {
       enqueueSnackbar('Journal entry created', { variant: 'success' })
     },
@@ -199,6 +200,7 @@ export const NewJournalPage: React.FC = () => {
             </Paper>
 
             <Button
+              loading={status === 'loading'}
               type="submit"
               variant="contained"
               color="primary"
