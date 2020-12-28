@@ -1,19 +1,20 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from 'react-query'
+import { useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
 import { Paper, Chip, MenuItem } from '@material-ui/core'
 import { Rating } from '@material-ui/lab'
-import { createNewJournal } from '../api/journals'
+import { createNewJournal, undoJournalEntry } from '../api/journals'
 import { PageTitle } from '../styleguide/page-title'
 import { Button } from '../styleguide/button'
 import { TextField } from '../styleguide/text-field'
 import { moodIcons } from '../utils/mood-icons'
 import { ErrorResponse } from '../types/error-response'
+import { initialFilters } from '../utils/journal-filters'
 
 const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
   const { icon: Icon } = moodIcons[value]
@@ -47,12 +48,35 @@ const initialValues: JournalFullASP = {
 
 export const NewJournalPage: React.FC = () => {
   const navigate = useNavigate()
-  const { enqueueSnackbar } = useSnackbar()
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
 
-  const [submitEntry, { status }] = useMutation(createNewJournal, {
+  const [undo] = useMutation(undoJournalEntry, {
     onSuccess: () => {
-      enqueueSnackbar('Journal entry created', { variant: 'success' })
+      queryCache.refetchQueries(['allJournals', initialFilters])
+    },
+    onError: (err: ErrorResponse) => {
+      enqueueSnackbar(err.response.data.message, { variant: 'error' })
+    },
+  })
+
+  const [submitEntry, { status }] = useMutation(createNewJournal, {
+    onSuccess: ({ _id }) => {
+      enqueueSnackbar('Journal entry created', {
+        variant: 'success',
+        action: key => (
+          <Button
+            variant="text"
+            color="secondary"
+            onClick={async () => {
+              await undo(_id)
+              closeSnackbar(key)
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      })
     },
     onError: (err: ErrorResponse) => {
       enqueueSnackbar(err.response.data.message, { variant: 'error' })

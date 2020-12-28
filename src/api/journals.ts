@@ -53,3 +53,6 @@ export const toggleJournalIsStarred = ({
   isStarred: boolean
 }): Promise<JournalFullASR> =>
   isStarred ? removeJournalFromStarred(id) : addJournalToStarred(id)
+
+export const undoJournalEntry = (id: string): Promise<JournalFullASR> =>
+  axios.delete(`${API_CONFIG.BASE_URL}/journals/${id}`).then(({ data }) => data)
