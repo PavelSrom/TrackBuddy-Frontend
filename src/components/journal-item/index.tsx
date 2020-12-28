@@ -9,10 +9,12 @@ import { truncateText } from '../../utils/funcs'
 
 type Props = {
   journal: JournalBriefASR
+  onToggleStarred: () => void
 }
 
 export const JournalItem: React.FC<Props> = ({
   journal: { mood, isStarred, standout, created },
+  onToggleStarred,
 }) => {
   const { icon: Icon } = moodIcons[mood]
   const StarIcon = isStarred ? Star : StarBorder
@@ -25,7 +27,7 @@ export const JournalItem: React.FC<Props> = ({
           <p className="text-base font-semibold">
             {dayjs(new Date(created)).format('D MMMM YYYY')}
           </p>
-          <IconButton size="small" edge="end">
+          <IconButton size="small" edge="end" onClick={() => onToggleStarred()}>
             <StarIcon className="text-yellow-400" />
           </IconButton>
         </div>

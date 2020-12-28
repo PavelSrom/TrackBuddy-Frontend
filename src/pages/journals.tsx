@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'react-query'
+import { useQuery, useMutation } from 'react-query'
+import { useSnackbar } from 'notistack'
 import dayjs from 'dayjs'
 import Add from '@material-ui/icons/Add'
 import Search from '@material-ui/icons/Search'
 import { Fab, IconButton } from '@material-ui/core'
-import { getAllJournals, journalMadeToday } from '../api/journals'
+import {
+  getAllJournals,
+  journalMadeToday,
+  toggleJournalIsStarred,
+} from '../api/journals'
 import { JournalsFilter } from '../components/journals-filter'
 import { JournalItem } from '../components/journal-item'
 import { PageTitle } from '../styleguide/page-title'
 import { Filters, initialFilters } from '../utils/journal-filters'
 import { JournalItemSkeleton } from '../styleguide/journal-item-skeleton'
+import { ErrorResponse } from '../types/error-response'
 
 // TODO: custom spinners & <SomethingWentWrong />
 
 export const JournalsPage: React.FC = () => {
   const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
   const [filterOpen, setFilterOpen] = useState<boolean>(false)
   const [filters, setFilters] = useState<Filters>(initialFilters)
 
@@ -31,6 +38,22 @@ export const JournalsPage: React.FC = () => {
     enabled: false,
   })
   const { data: foundJournal } = useQuery('journalMadeToday', journalMadeToday)
+
+  const [toggleStarred] = useMutation(toggleJournalIsStarred, {
+    onSuccess: (_data, { isStarred }) => {
+      enqueueSnackbar(
+        isStarred ? 'Journal removed from starred' : 'Journal added to starred',
+        { variant: 'success' }
+      )
+    },
+    onError: (err: ErrorResponse) => {
+      enqueueSnackbar(err.response.data.message, { variant: 'error' })
+    },
+    onSettled: () => {
+      // invalidating queries does not work if 'enabled' is set to false
+      refetchJournals()
+    },
+  })
 
   useEffect(() => {
     refetchJournals()
@@ -64,7 +87,16 @@ export const JournalsPage: React.FC = () => {
         <>
           {journals!.length > 0 ? (
             journals!.map(journal => (
-              <JournalItem key={journal._id} journal={journal} />
+              <JournalItem
+                key={journal._id}
+                journal={journal}
+                onToggleStarred={() =>
+                  toggleStarred({
+                    id: journal._id,
+                    isStarred: journal.isStarred,
+                  })
+                }
+              />
             ))
           ) : (
             <p>
