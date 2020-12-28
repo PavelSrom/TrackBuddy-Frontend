@@ -54,6 +54,7 @@ export const NewJournalPage: React.FC = () => {
   const [undo] = useMutation(undoJournalEntry, {
     onSuccess: () => {
       queryCache.refetchQueries(['allJournals', initialFilters])
+      queryCache.invalidateQueries('journalMadeToday')
     },
     onError: (err: ErrorResponse) => {
       enqueueSnackbar(err.response.data.message, { variant: 'error' })
@@ -92,7 +93,7 @@ export const NewJournalPage: React.FC = () => {
 
   return (
     <>
-      <PageTitle className="mb-6">{todayDate}</PageTitle>
+      <PageTitle className="mt-4 mb-6">{todayDate}</PageTitle>
 
       <Formik
         initialValues={initialValues}
