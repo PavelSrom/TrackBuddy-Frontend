@@ -30,6 +30,7 @@ type Props = {
   open: boolean
   onClose: () => void
   onReset: () => void
+  onApply: () => void
   filters: Filters
   setFilters: Dispatch<SetStateAction<Filters>>
 }
@@ -38,10 +39,10 @@ export const JournalsFilter: React.FC<Props> = ({
   open,
   onClose,
   onReset,
+  onApply,
   filters,
   setFilters,
 }) => {
-  console.log(filters)
   return (
     <Drawer
       anchor="top"
@@ -117,7 +118,7 @@ export const JournalsFilter: React.FC<Props> = ({
         <Button variant="outlined" color="primary" onClick={onReset}>
           Reset filters
         </Button>
-        <Button variant="contained" color="secondary" onClick={onClose}>
+        <Button variant="contained" color="secondary" onClick={onApply}>
           Apply
         </Button>
       </div>

@@ -8,9 +8,7 @@ import { moodIcons } from '../../utils/mood-icons'
 import { truncateText } from '../../utils/funcs'
 
 type Props = {
-  journal: JournalBriefASR & {
-    created: string
-  }
+  journal: JournalBriefASR
 }
 
 export const JournalItem: React.FC<Props> = ({
