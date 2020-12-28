@@ -85,7 +85,7 @@ export const JournalsFilter: React.FC<Props> = ({
         <FormControlLabel
           control={
             <Checkbox
-              checked={filters.favorites}
+              checked={!!filters.favorites}
               onChange={(_e, checked) =>
                 setFilters({ ...filters, favorites: checked })
               }

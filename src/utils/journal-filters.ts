@@ -1,13 +1,13 @@
 export type Filters = {
   month: number
   year: number
-  favorites: boolean
+  favorites: boolean | null
   sortBy: string
 }
 
 export const initialFilters = {
   month: new Date().getMonth(),
   year: new Date().getFullYear(),
-  favorites: false,
+  favorites: null,
   sortBy: 'newest',
 }
