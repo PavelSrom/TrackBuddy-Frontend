@@ -78,7 +78,7 @@ export const RegisterPage: React.FC = () => {
             <TextField
               name="password"
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               fullWidth
               InputProps={{
                 endAdornment: (

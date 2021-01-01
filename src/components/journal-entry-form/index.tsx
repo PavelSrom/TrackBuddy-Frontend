@@ -19,10 +19,13 @@ const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
 
 type Props = {
   loading: boolean
-  tags?: string[] // TODO: pass tags as props once implemented
+  availableTags?: string[]
 }
 
-export const JournalEntryForm: React.FC<Props> = ({ loading }) => {
+export const JournalEntryForm: React.FC<Props> = ({
+  loading,
+  availableTags,
+}) => {
   const { values, setFieldValue } = useFormikContext<JournalFullASP>()
 
   return (
@@ -109,10 +112,13 @@ export const JournalEntryForm: React.FC<Props> = ({ loading }) => {
       {/* tags */}
       <Paper className="mb-6 p-4">
         <p className="text-xl font-semibold mb-2">Do you wish to add tags?</p>
+        {availableTags!.length === 0 && (
+          <p className="mb-2">(No tags available)</p>
+        )}
         <TextField
           name="tags"
           fullWidth
-          placeholder="Select tags... (optional)"
+          disabled={availableTags!.length === 0}
           select
           SelectProps={{
             multiple: true,
@@ -136,12 +142,11 @@ export const JournalEntryForm: React.FC<Props> = ({ loading }) => {
             },
           }}
         >
-          <MenuItem value="one">One</MenuItem>
-          <MenuItem value="two">Two</MenuItem>
-          <MenuItem value="three">Three</MenuItem>
-          <MenuItem value="four">Four</MenuItem>
-          <MenuItem value="five">Five</MenuItem>
-          <MenuItem value="six">Six</MenuItem>
+          {availableTags!.map(tag => (
+            <MenuItem key={tag} value={tag}>
+              {tag}
+            </MenuItem>
+          ))}
         </TextField>
       </Paper>
 

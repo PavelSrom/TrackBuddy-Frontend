@@ -1,10 +1,11 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, queryCache } from 'react-query'
+import { useQuery, useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
 import { Formik } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
+import { getUsersTags } from '../api/profile'
 import { createNewJournal, undoJournalEntry } from '../api/journals'
 import { JournalEntryForm } from '../components/journal-entry-form'
 import { PageTitle } from '../styleguide/page-title'
@@ -27,6 +28,8 @@ export const NewJournalPage: React.FC = () => {
   const navigate = useNavigate()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const todayDate = dayjs(new Date()).format('D MMMM YYYY')
+
+  const { data: tags } = useQuery('usersTags', getUsersTags)
 
   const [undo] = useMutation(undoJournalEntry, {
     onSuccess: () => {
@@ -79,7 +82,10 @@ export const NewJournalPage: React.FC = () => {
         validateOnBlur={false}
         validationSchema={journalEntrySchema}
       >
-        <JournalEntryForm loading={status === 'loading'} />
+        <JournalEntryForm
+          loading={status === 'loading'}
+          availableTags={tags ?? []}
+        />
       </Formik>
     </>
   )
