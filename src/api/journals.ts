@@ -35,6 +35,17 @@ export const createNewJournal = (
     .post(`${API_CONFIG.BASE_URL}/journals`, formData)
     .then(({ data }) => data)
 
+export const updateJournal = ({
+  id,
+  formData,
+}: {
+  id: string
+  formData: JournalFullASP
+}): Promise<JournalFullASR> =>
+  axios
+    .put(`${API_CONFIG.BASE_URL}/journals/${id}`, formData)
+    .then(({ data }) => data)
+
 export const addJournalToStarred = (id: string): Promise<JournalFullASR> =>
   axios
     .post(`${API_CONFIG.BASE_URL}/journals/favorite/${id}`)

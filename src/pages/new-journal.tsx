@@ -3,38 +3,15 @@ import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
-import { Formik, Form } from 'formik'
-import * as Yup from 'yup'
+import { Formik } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { Paper, Chip, MenuItem } from '@material-ui/core'
-import { Rating } from '@material-ui/lab'
 import { createNewJournal, undoJournalEntry } from '../api/journals'
+import { JournalEntryForm } from '../components/journal-entry-form'
 import { PageTitle } from '../styleguide/page-title'
 import { Button } from '../styleguide/button'
-import { TextField } from '../styleguide/text-field'
-import { moodIcons } from '../utils/mood-icons'
 import { ErrorResponse } from '../types/error-response'
 import { initialFilters } from '../utils/journal-filters'
-
-const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
-  const { icon: Icon } = moodIcons[value]
-
-  return (
-    <span {...rest}>
-      <Icon style={{ fontSize: 36 }} />
-    </span>
-  )
-}
-
-const validationSchema = Yup.object().shape({
-  mood: Yup.number().min(1).max(5).required('required'),
-  standout: Yup.string().required('required'),
-  wentWell: Yup.string().required('required'),
-  wentWrong: Yup.string().required('required'),
-  betterNextTime: Yup.string().required('required'),
-  excuses: Yup.string(),
-  tags: Yup.array().of(Yup.string()),
-})
+import { journalEntrySchema } from '../utils/validations'
 
 const initialValues: JournalFullASP = {
   mood: 3,
@@ -64,14 +41,14 @@ export const NewJournalPage: React.FC = () => {
   const [submitEntry, { status }] = useMutation(createNewJournal, {
     onSuccess: ({ _id }) => {
       enqueueSnackbar('Journal entry created', {
-        variant: 'success',
+        variant: 'default',
         action: key => (
           <Button
             variant="text"
             color="secondary"
-            onClick={async () => {
-              await undo(_id)
-              closeSnackbar(key)
+            onClick={() => {
+              // make a request and close the snackbar no matter what
+              undo(_id).finally(() => closeSnackbar(key))
             }}
           >
             Undo
@@ -100,142 +77,9 @@ export const NewJournalPage: React.FC = () => {
         onSubmit={handleSubmit}
         validateOnChange={false}
         validateOnBlur={false}
-        validationSchema={validationSchema}
+        validationSchema={journalEntrySchema}
       >
-        {({ values, setFieldValue }) => (
-          <Form>
-            {/* mood */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">How do you feel?</p>
-              <div className="flex items-center">
-                <Rating
-                  name="mood"
-                  value={values.mood}
-                  onChange={(_e, newValue) => {
-                    // do not touch formik if invalid value
-                    if (newValue === null) return
-
-                    setFieldValue('mood', +newValue!)
-                  }}
-                  getLabelText={(mood: number) => moodIcons[mood].label}
-                  IconContainerComponent={IconContainer}
-                />
-                <p className="text-sm ml-4">{moodIcons[values.mood].label}</p>
-              </div>
-            </Paper>
-
-            {/* standout */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">
-                What stood out during the day?
-              </p>
-              <TextField
-                name="standout"
-                fullWidth
-                multiline
-                placeholder="Type something..."
-              />
-            </Paper>
-
-            {/* went well */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">What went well?</p>
-              <TextField
-                name="wentWell"
-                fullWidth
-                multiline
-                placeholder="Type something..."
-              />
-            </Paper>
-
-            {/* went wrong */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">What went wrong?</p>
-              <TextField
-                name="wentWrong"
-                fullWidth
-                multiline
-                placeholder="Type something..."
-              />
-            </Paper>
-
-            {/* better next time */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">
-                What could be done better next time?
-              </p>
-              <TextField
-                name="betterNextTime"
-                fullWidth
-                multiline
-                placeholder="Type something..."
-              />
-            </Paper>
-
-            {/* excuses */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">Any excuses you had?</p>
-              <TextField
-                name="excuses"
-                fullWidth
-                multiline
-                placeholder="Type something... (optional)"
-              />
-            </Paper>
-
-            {/* tags */}
-            <Paper className="mb-6 p-4">
-              <p className="text-xl font-semibold mb-2">
-                Do you wish to add tags?
-              </p>
-              <TextField
-                name="tags"
-                fullWidth
-                placeholder="Select tags... (optional)"
-                select
-                SelectProps={{
-                  multiple: true,
-                  value: values.tags,
-                  renderValue(selected) {
-                    return (
-                      <div className="flex flex-wrap">
-                        {/* @ts-ignore */}
-                        {selected.map(value => (
-                          <Chip
-                            key={value}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                            label={value}
-                            className="m-0.5"
-                          />
-                        ))}
-                      </div>
-                    )
-                  },
-                }}
-              >
-                <MenuItem value="one">One</MenuItem>
-                <MenuItem value="two">Two</MenuItem>
-                <MenuItem value="three">Three</MenuItem>
-                <MenuItem value="four">Four</MenuItem>
-                <MenuItem value="five">Five</MenuItem>
-                <MenuItem value="six">Six</MenuItem>
-              </TextField>
-            </Paper>
-
-            <Button
-              loading={status === 'loading'}
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              className="mb-6"
-            >
-              Submit journal
-            </Button>
-          </Form>
-        )}
+        <JournalEntryForm loading={status === 'loading'} />
       </Formik>
     </>
   )
