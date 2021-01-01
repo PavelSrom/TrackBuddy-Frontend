@@ -37,7 +37,6 @@ export const JournalsPage: React.FC = () => {
   } = useQuery(['allJournals', filters], getAllJournals, {
     enabled: false,
   })
-  console.log(journals)
   const { data: foundJournal } = useQuery('journalMadeToday', journalMadeToday)
 
   const [toggleStarred] = useMutation(toggleJournalIsStarred, {
