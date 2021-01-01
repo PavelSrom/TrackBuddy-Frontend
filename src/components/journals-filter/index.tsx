@@ -33,6 +33,7 @@ type Props = {
   onApply: () => void
   filters: Filters
   setFilters: Dispatch<SetStateAction<Filters>>
+  tags: string[] | undefined
 }
 
 export const JournalsFilter: React.FC<Props> = ({
@@ -42,6 +43,7 @@ export const JournalsFilter: React.FC<Props> = ({
   onApply,
   filters,
   setFilters,
+  tags,
 }) => {
   return (
     <Drawer

@@ -10,8 +10,8 @@ export const JournalItemSkeleton: React.FC<Props> = ({
   numOfSkeletons = 4,
 }) => (
   <>
-    {[...new Array(numOfSkeletons)].map(item => (
-      <Paper key={item} className="mb-6 w-full p-2 flex">
+    {[...new Array(numOfSkeletons)].map((_, index) => (
+      <Paper key={index} className="mb-6 w-full p-2 flex">
         <Skeleton variant="circle" width={60} height={60} />
         <div className="px-2 flex-1">
           <Skeleton variant="text" width={144} />

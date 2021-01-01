@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import Add from '@material-ui/icons/Add'
 import Search from '@material-ui/icons/Search'
 import { Fab, IconButton } from '@material-ui/core'
+import { getUsersTags } from '../api/profile'
 import {
   getAllJournals,
   journalMadeToday,
@@ -18,7 +19,7 @@ import { Filters, initialFilters } from '../utils/journal-filters'
 import { JournalItemSkeleton } from '../styleguide/journal-item-skeleton'
 import { ErrorResponse } from '../types/error-response'
 
-// TODO: custom spinners & <SomethingWentWrong />
+// TODO: custom spinners & <SomethingWentWrong />, tags logic
 
 export const JournalsPage: React.FC = () => {
   const navigate = useNavigate()
@@ -37,8 +38,11 @@ export const JournalsPage: React.FC = () => {
   } = useQuery(['allJournals', filters], getAllJournals, {
     enabled: false,
   })
-  console.log(journals)
+
   const { data: foundJournal } = useQuery('journalMadeToday', journalMadeToday)
+
+  const { data: tags } = useQuery('usersTags', getUsersTags)
+  console.log(tags)
 
   const [toggleStarred] = useMutation(toggleJournalIsStarred, {
     onSuccess: (_data, { isStarred }) => {
@@ -73,6 +77,7 @@ export const JournalsPage: React.FC = () => {
         }}
         filters={filters}
         setFilters={setFilters}
+        tags={tags}
       />
 
       <div className="flex justify-between mt-4 mb-6">
