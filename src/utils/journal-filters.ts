@@ -3,7 +3,7 @@ export type Filters = {
   year: number
   favorites: boolean | null
   sortBy: string
-  tags: string[]
+  tag: string
 }
 
 export const initialFilters: Filters = {
@@ -11,5 +11,5 @@ export const initialFilters: Filters = {
   year: new Date().getFullYear(),
   favorites: null,
   sortBy: 'newest',
-  tags: [],
+  tag: '',
 }

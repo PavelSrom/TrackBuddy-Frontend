@@ -14,7 +14,7 @@ export const getAllJournals = (
 ): Promise<JournalBriefASR[]> => {
   const query = queryString.stringify(filters, {
     skipNull: true,
-    arrayFormat: 'comma',
+    skipEmptyString: true,
   })
 
   return axios

@@ -5,7 +5,6 @@ import {
   MenuItem,
   FormControlLabel,
   Checkbox,
-  Chip,
 } from '@material-ui/core'
 import { TextField } from '../../styleguide/text-field'
 import { Button } from '../../styleguide/button'
@@ -46,17 +45,17 @@ export const JournalsFilter: React.FC<Props> = ({
   setFilters,
   tags,
 }) => {
-  const handleTagChange = (chosenTag: string): void => {
-    let newTags = [...filters.tags]
+  // const handleTagChange = (chosenTag: string): void => {
+  //   let newTags = [...filters.tags]
 
-    if (newTags.includes(chosenTag)) {
-      newTags = newTags.filter(tag => tag !== chosenTag)
-    } else {
-      newTags.push(chosenTag)
-    }
+  //   if (newTags.includes(chosenTag)) {
+  //     newTags = newTags.filter(tag => tag !== chosenTag)
+  //   } else {
+  //     newTags.push(chosenTag)
+  //   }
 
-    setFilters({ ...filters, tags: newTags })
-  }
+  //   setFilters({ ...filters, tags: newTags })
+  // }
 
   return (
     <Drawer
@@ -102,37 +101,13 @@ export const JournalsFilter: React.FC<Props> = ({
           noFormik
           disabled={tags?.length === 0}
           select
-          value={filters.tags}
+          value={filters.tag}
+          onChange={e => setFilters({ ...filters, tag: e.target.value })}
           className="mt-4"
-          label="Tags"
-          SelectProps={{
-            multiple: true,
-            value: filters.tags,
-            renderValue(selected) {
-              return (
-                <div className="flex flex-wrap">
-                  {/* @ts-ignore */}
-                  {selected.map(value => (
-                    <Chip
-                      key={value}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      label={value}
-                      className="m-0.5"
-                    />
-                  ))}
-                </div>
-              )
-            },
-          }}
+          label="Tag"
         >
           {tags?.map(tag => (
-            <MenuItem
-              key={tag}
-              value={tag}
-              onClick={() => handleTagChange(tag)}
-            >
+            <MenuItem key={tag} value={tag}>
               {tag}
             </MenuItem>
           ))}

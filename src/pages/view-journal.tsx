@@ -21,6 +21,7 @@ import { PageTitle } from '../styleguide/page-title'
 import { moodIcons } from '../utils/mood-icons'
 import { ErrorResponse } from '../types/error-response'
 import { journalEntrySchema } from '../utils/validations'
+import { getUsersTags } from '../api/profile'
 
 dayjs.extend(isToday)
 
@@ -33,6 +34,8 @@ export const ViewJournalPage: React.FC = () => {
     ['getFullJournal', params.id],
     getJournalById
   )
+
+  const { data: tags } = useQuery('usersTags', getUsersTags)
 
   const [editJournal, { status: editStatus }] = useMutation(updateJournal, {
     onSuccess: () => {
@@ -108,7 +111,10 @@ export const ViewJournalPage: React.FC = () => {
           validateOnBlur={false}
           validationSchema={journalEntrySchema}
         >
-          <JournalEntryForm loading={editStatus === 'loading'} />
+          <JournalEntryForm
+            loading={editStatus === 'loading'}
+            availableTags={tags ?? []}
+          />
         </Formik>
       ) : (
         <>
