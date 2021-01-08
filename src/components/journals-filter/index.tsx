@@ -5,6 +5,7 @@ import {
   MenuItem,
   FormControlLabel,
   Checkbox,
+  Chip,
 } from '@material-ui/core'
 import { TextField } from '../../styleguide/text-field'
 import { Button } from '../../styleguide/button'
@@ -45,6 +46,18 @@ export const JournalsFilter: React.FC<Props> = ({
   setFilters,
   tags,
 }) => {
+  const handleTagChange = (chosenTag: string): void => {
+    let newTags = [...filters.tags]
+
+    if (newTags.includes(chosenTag)) {
+      newTags = newTags.filter(tag => tag !== chosenTag)
+    } else {
+      newTags.push(chosenTag)
+    }
+
+    setFilters({ ...filters, tags: newTags })
+  }
+
   return (
     <Drawer
       anchor="top"
@@ -84,6 +97,46 @@ export const JournalsFilter: React.FC<Props> = ({
             ))}
           </TextField>
         </div>
+        <TextField
+          fullWidth
+          noFormik
+          disabled={tags?.length === 0}
+          select
+          value={filters.tags}
+          className="mt-4"
+          label="Tags"
+          SelectProps={{
+            multiple: true,
+            value: filters.tags,
+            renderValue(selected) {
+              return (
+                <div className="flex flex-wrap">
+                  {/* @ts-ignore */}
+                  {selected.map(value => (
+                    <Chip
+                      key={value}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      label={value}
+                      className="m-0.5"
+                    />
+                  ))}
+                </div>
+              )
+            },
+          }}
+        >
+          {tags?.map(tag => (
+            <MenuItem
+              key={tag}
+              value={tag}
+              onClick={() => handleTagChange(tag)}
+            >
+              {tag}
+            </MenuItem>
+          ))}
+        </TextField>
         <FormControlLabel
           control={
             <Checkbox

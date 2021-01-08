@@ -3,11 +3,13 @@ export type Filters = {
   year: number
   favorites: boolean | null
   sortBy: string
+  tags: string[]
 }
 
-export const initialFilters = {
+export const initialFilters: Filters = {
   month: new Date().getMonth(),
   year: new Date().getFullYear(),
   favorites: null,
   sortBy: 'newest',
+  tags: [],
 }

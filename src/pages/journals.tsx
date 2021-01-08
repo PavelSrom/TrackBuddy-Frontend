@@ -42,7 +42,6 @@ export const JournalsPage: React.FC = () => {
   const { data: foundJournal } = useQuery('journalMadeToday', journalMadeToday)
 
   const { data: tags } = useQuery('usersTags', getUsersTags)
-  console.log(tags)
 
   const [toggleStarred] = useMutation(toggleJournalIsStarred, {
     onSuccess: (_data, { isStarred }) => {
