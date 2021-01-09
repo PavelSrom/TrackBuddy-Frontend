@@ -20,6 +20,7 @@
     "autoprefixer": "^9.8.6",
     "axios": "^0.21.0",
     "clsx": "^1.1.1",
+    "date-fns": "^2.16.1",
     "dayjs": "^1.9.6",
     "formik": "^2.2.5",
     "notistack": "^1.0.2",

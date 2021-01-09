@@ -10,12 +10,10 @@ export const getHabitsDashboard = (): Promise<HabitOverviewASR[]> =>
   axios.get(`${API_CONFIG.BASE_URL}/habits`).then(({ data }) => data)
 
 export const getHabitById = (_key: string, id: string): Promise<HabitFullASR> =>
-  axios.get(`${API_CONFIG.BASE_URL}/journals/${id}`).then(({ data }) => data)
+  axios.get(`${API_CONFIG.BASE_URL}/habits/${id}`).then(({ data }) => data)
 
 export const createNewHabit = (formData: HabitNewASP): Promise<HabitFullASR> =>
-  axios
-    .post(`${API_CONFIG.BASE_URL}/journals`, formData)
-    .then(({ data }) => data)
+  axios.post(`${API_CONFIG.BASE_URL}/habits`, formData).then(({ data }) => data)
 
 export const deleteHabit = (id: string): Promise<HabitFullASR> =>
   axios.delete(`${API_CONFIG.BASE_URL}/habits/${id}`).then(({ data }) => data)
