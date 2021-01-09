@@ -45,18 +45,6 @@ export const JournalsFilter: React.FC<Props> = ({
   setFilters,
   tags,
 }) => {
-  // const handleTagChange = (chosenTag: string): void => {
-  //   let newTags = [...filters.tags]
-
-  //   if (newTags.includes(chosenTag)) {
-  //     newTags = newTags.filter(tag => tag !== chosenTag)
-  //   } else {
-  //     newTags.push(chosenTag)
-  //   }
-
-  //   setFilters({ ...filters, tags: newTags })
-  // }
-
   return (
     <Drawer
       anchor="top"

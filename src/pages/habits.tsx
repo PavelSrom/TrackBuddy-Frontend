@@ -1,19 +1,26 @@
 import React, { useState } from 'react'
-import { formatDistanceToNow, isToday } from 'date-fns'
+import { isToday } from 'date-fns'
 import { useQuery, useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
-import { Fab, Paper, Radio } from '@material-ui/core'
+import { Fab } from '@material-ui/core'
 import Add from '@material-ui/icons/Add'
-import { getHabitsDashboard, createNewHabit } from '../api/habits'
+import {
+  getHabitsDashboard,
+  createNewHabit,
+  toggleHabitCheck,
+} from '../api/habits'
 import { PageTitle } from '../styleguide/page-title'
 import { NewHabitDialog } from '../components/new-habit-dialog'
 import { ErrorResponse } from '../types/error-response'
+import { HabitColor } from '../utils/funcs'
+import { HabitItem } from '../components/habit-item'
+import { HabitItemSkeleton } from '../styleguide/habit-item-skeleton'
 
 export const HabitsPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
-  const { data } = useQuery('habitsDashboard', getHabitsDashboard)
+  const { data, status } = useQuery('habitsDashboard', getHabitsDashboard)
   console.log(data)
 
   const [submitNewHabit, { status: newHabitStatus }] = useMutation(
@@ -32,6 +39,22 @@ export const HabitsPage: React.FC = () => {
     }
   )
 
+  const [toggleHabit] = useMutation(toggleHabitCheck, {
+    onSuccess: (_data, { lastCheckToday }) => {
+      enqueueSnackbar(lastCheckToday ? 'Habit unchecked' : 'Habit checked', {
+        variant: 'success',
+      })
+    },
+    onError: () => {
+      enqueueSnackbar('Cannot update repetitions', { variant: 'error' })
+    },
+    onSettled: () => {
+      queryCache.invalidateQueries('habitsDashboard')
+    },
+  })
+
+  const colorsTaken = data && data.map(({ color }) => color)
+
   return (
     <>
       <NewHabitDialog
@@ -39,24 +62,36 @@ export const HabitsPage: React.FC = () => {
         loading={newHabitStatus === 'loading'}
         onClose={() => setDialogOpen(false)}
         onSubmit={values => submitNewHabit(values)}
+        colorsTaken={(colorsTaken ?? []) as HabitColor[]}
       />
 
+      <p>Progress bar coming soon</p>
       <PageTitle className="mt-4 mb-6">My habits</PageTitle>
 
-      {data &&
-        data.map(({ _id, color, duration, frequency, name, newestRep }) => (
-          <Paper key={_id} className="p-4">
-            <div className="h-full flex items-center">
-              <Radio checked={isToday(new Date(newestRep))} className="mr-4" />
-              <div>
-                <p className="text-xl font-semibold">{name}</p>
-                <p className="text-sm">
-                  {duration} minutes, every {frequency} days
-                </p>
-              </div>
-            </div>
-          </Paper>
-        ))}
+      {status === 'loading' ? (
+        <HabitItemSkeleton />
+      ) : status === 'success' ? (
+        data!.map(habit => {
+          const lastCheckIsToday = isToday(new Date(habit.newestRep))
+
+          return (
+            <HabitItem
+              key={habit._id}
+              habit={habit}
+              lastCheckIsToday={lastCheckIsToday}
+              onToggleClick={() =>
+                toggleHabit({
+                  id: habit._id,
+                  day: lastCheckIsToday ? habit.newestRep : Date.now(),
+                  lastCheckToday: lastCheckIsToday,
+                })
+              }
+            />
+          )
+        })
+      ) : (
+        <p>Something went wrong</p>
+      )}
 
       <Fab
         disabled={data ? data.length > 5 : false}

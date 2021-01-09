@@ -18,6 +18,31 @@ export const createNewHabit = (formData: HabitNewASP): Promise<HabitFullASR> =>
 export const deleteHabit = (id: string): Promise<HabitFullASR> =>
   axios.delete(`${API_CONFIG.BASE_URL}/habits/${id}`).then(({ data }) => data)
 
+type Check = {
+  id: string
+  day: number
+}
+
+export const checkHabit = ({ id, day }: Check): Promise<{ message: string }> =>
+  axios
+    .post(`${API_CONFIG.BASE_URL}/habits/${id}/check?day=${day}`)
+    .then(({ data }) => data)
+
+export const uncheckHabit = ({
+  id,
+  day,
+}: Check): Promise<{ message: string }> =>
+  axios
+    .delete(`${API_CONFIG.BASE_URL}/habits/${id}/check?day=${day}`)
+    .then(({ data }) => data)
+
+export const toggleHabitCheck = ({
+  id,
+  day,
+  lastCheckToday,
+}: Check & { lastCheckToday: boolean }): Promise<{ message: string }> =>
+  lastCheckToday ? uncheckHabit({ id, day }) : checkHabit({ id, day })
+
 export const getHabitRepetitions = (
   _key: string,
   id: string,

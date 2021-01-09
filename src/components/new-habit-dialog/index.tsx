@@ -12,6 +12,7 @@ import {
 import { HabitNewASP } from 'trackbuddy-shared/payloads/habits'
 import { Button } from '../../styleguide/button'
 import { TextField } from '../../styleguide/text-field'
+import { HabitColor } from '../../utils/funcs'
 
 const initialValues: HabitNewASP = {
   name: '',
@@ -27,7 +28,7 @@ const validationSchema = Yup.object().shape({
   frequency: Yup.number().required('required'),
 })
 
-const colorOptions: { label: string; color: string }[] = [
+const colorOptions: { label: HabitColor; color: string }[] = [
   {
     label: 'red',
     color: 'bg-red-500',
@@ -55,6 +56,7 @@ type Props = {
   onClose: () => void
   onSubmit: (values: HabitNewASP) => void
   loading: boolean
+  colorsTaken: HabitColor[]
 }
 
 export const NewHabitDialog: React.FC<Props> = ({
@@ -62,6 +64,7 @@ export const NewHabitDialog: React.FC<Props> = ({
   onClose,
   onSubmit,
   loading,
+  colorsTaken,
 }) => {
   return (
     <Dialog
@@ -94,8 +97,9 @@ export const NewHabitDialog: React.FC<Props> = ({
                 {colorOptions.map(({ label, color }) => (
                   <MenuItem
                     key={label}
-                    value={color}
+                    value={label}
                     className="flex items-center"
+                    disabled={colorsTaken.some(col => col === label)}
                   >
                     <div className={clsx('w-5 h-5 rounded-full mr-4', color)} />
                     <p>{label.toUpperCase()}</p>
