@@ -54,7 +54,9 @@ const saveHabitsToStorage = (habits: HabitOverviewASR[]): void => {
   )
 }
 
-// TODO: refactor the 4 useEffects for local storage stuff
+// TODO: refactor the 3 useEffects for local storage stuff
+// the logic has to be different
+// probably another API endpoint for that
 
 export const HabitsPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
@@ -71,6 +73,12 @@ export const HabitsPage: React.FC = () => {
     getHabitsDashboard
   )
 
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('trackbuddy-today')
+    }
+  }, [])
+
   // manually triggering save/load LS todos (new habit / deleted habit etc.)
   useEffect(() => {
     setStorageSave(false)
@@ -86,6 +94,7 @@ export const HabitsPage: React.FC = () => {
     // eslint-disable-next-line
   }, [shouldStorageSave])
 
+  // loading and displaying habits to do for today
   useEffect(() => {
     if (habits) {
       // check if there's item in local storage
@@ -98,16 +107,11 @@ export const HabitsPage: React.FC = () => {
       if (!storageTodos || !isToday(new Date(storageTodos.day))) {
         saveHabitsToStorage(habits)
       }
+
+      if (storageTodos) {
+        if (isToday(storageTodos.day)) setHabitsForToday(storageTodos.todos)
+      }
     }
-  }, [habits])
-
-  useEffect(() => {
-    // if there is habits to do today, set them for the progress bar
-    const storageTodos = JSON.parse(
-      localStorage.getItem('trackbuddy-today') as string
-    )
-
-    if (isToday(storageTodos.day)) setHabitsForToday(storageTodos.todos)
   }, [habits])
 
   // recalculating how many habits and minutes are left for today
@@ -176,30 +180,32 @@ export const HabitsPage: React.FC = () => {
 
   return (
     <>
-      <div className="mt-4 mb-6">
-        <PageTitle className="mb-2">
-          {progressValue === 100
-            ? 'You rock! Keep it up!'
-            : progressValue > 80
-            ? 'Almost there!'
-            : progressValue > 60
-            ? 'Getting there!'
-            : progressValue >= 50
-            ? 'Halfway there!'
-            : 'Your progress'}
-        </PageTitle>
-        <p className="font-semibold">Today&apos;s agenda:</p>
-        <div className="flex justify-between">
-          <p className="text-sm">{habitsToGo} habits to go</p>
-          <p className="text-sm">{minutesToGo} minutes to go</p>
+      {habits && habits?.length > 0 && (
+        <div className="mt-4 mb-6">
+          <PageTitle className="mb-2">
+            {progressValue === 100
+              ? 'You rock! Keep it up!'
+              : progressValue > 80
+              ? 'Almost there!'
+              : progressValue > 60
+              ? 'Getting there!'
+              : progressValue >= 50
+              ? 'Halfway there!'
+              : 'Your progress'}
+          </PageTitle>
+          <p className="font-semibold">Today&apos;s agenda:</p>
+          <div className="flex justify-between">
+            <p className="text-sm">{habitsToGo} habits to go</p>
+            <p className="text-sm">{minutesToGo} minutes to go</p>
+          </div>
+          <div className="mt-2">
+            <LinearProgressWithLabel
+              variant="determinate"
+              value={progressValue}
+            />
+          </div>
         </div>
-        <div className="mt-2">
-          <LinearProgressWithLabel
-            variant="determinate"
-            value={progressValue}
-          />
-        </div>
-      </div>
+      )}
 
       <NewHabitDialog
         open={dialogOpen}
@@ -237,7 +243,7 @@ export const HabitsPage: React.FC = () => {
       )}
 
       <Fab
-        disabled={habits ? habits.length > 5 : false}
+        disabled={habits ? habits.length >= 5 : false}
         color="secondary"
         className="fixed bottom-4 right-4"
         onClick={() => setDialogOpen(true)}
