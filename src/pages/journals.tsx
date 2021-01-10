@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-query'
 import { useSnackbar } from 'notistack'
-import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import Add from '@material-ui/icons/Add'
 import Search from '@material-ui/icons/Search'
 import { Fab, IconButton } from '@material-ui/core'
@@ -27,8 +27,9 @@ export const JournalsPage: React.FC = () => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false)
   const [filters, setFilters] = useState<Filters>(initialFilters)
 
-  const monthAndYear = dayjs(new Date(filters.year, filters.month, 15)).format(
-    'MMMM YYYY'
+  const monthAndYear = format(
+    new Date(filters.year, filters.month, 15),
+    'MMMM yyyy'
   )
 
   const {

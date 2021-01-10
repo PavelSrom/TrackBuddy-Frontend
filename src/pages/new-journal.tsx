@@ -1,5 +1,5 @@
 import React from 'react'
-import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
@@ -27,7 +27,7 @@ const initialValues: JournalFullASP = {
 export const NewJournalPage: React.FC = () => {
   const navigate = useNavigate()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-  const todayDate = dayjs(new Date()).format('D MMMM YYYY')
+  const todayDate = format(new Date(), 'd MMMM yyyy')
 
   const { data: tags } = useQuery('usersTags', getUsersTags)
 
