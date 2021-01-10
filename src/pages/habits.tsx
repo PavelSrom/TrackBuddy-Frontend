@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { isToday, differenceInDays, startOfDay } from 'date-fns'
 import { useDebounce } from 'use-debounce'
 import { useQuery, useMutation, queryCache } from 'react-query'
@@ -58,8 +59,12 @@ const saveHabitsToStorage = (habits: HabitOverviewASR[]): void => {
 // the logic has to be different
 // probably another API endpoint for that
 
+// 1. on first fetch during the day, save todos to local storage
+// 2. adjust that array whenever a habit is created or deleted
+
 export const HabitsPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
+  const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [habitsForToday, setHabitsForToday] = useState<HabitOverviewASR[]>([])
   const [habitsToGo, setHabitsToGo] = useState<number>(0)
@@ -228,6 +233,7 @@ export const HabitsPage: React.FC = () => {
               key={habit._id}
               habit={habit}
               lastCheckIsToday={lastCheckIsToday}
+              onCardClick={() => navigate(`/habits/${habit._id}`)}
               onToggleClick={() =>
                 toggleHabit({
                   id: habit._id,

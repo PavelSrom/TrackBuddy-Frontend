@@ -46,7 +46,7 @@ export const toggleHabitCheck = ({
 export const getHabitRepetitions = (
   _key: string,
   id: string,
-  { min, max }: { min: string; max: string }
+  { min, max }: { min: number; max: number }
 ): Promise<number[]> =>
   axios
     .get(

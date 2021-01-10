@@ -11,22 +11,31 @@ import { determineHabitColor, HabitColor } from '../../utils/funcs'
 type Props = {
   habit: HabitOverviewASR
   onToggleClick: () => void
+  onCardClick: () => void
   lastCheckIsToday: boolean
 }
 
 export const HabitItem: React.FC<Props> = ({
   habit: { _id, name, color, duration, frequency, newestRep },
   onToggleClick,
+  onCardClick,
   lastCheckIsToday,
 }) => {
+  const onRadioClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): void => {
+    e.stopPropagation()
+    onToggleClick()
+  }
+
   return (
-    <Paper key={_id} className="p-4 mb-2">
+    <Paper key={_id} className="p-4 mb-2" onClick={onCardClick}>
       <div className="h-full flex items-center">
         <IconButton
           size="small"
           color="primary"
           className="mr-4"
-          onClick={onToggleClick}
+          onClick={onRadioClick}
         >
           {lastCheckIsToday ? (
             <CheckedCircle
