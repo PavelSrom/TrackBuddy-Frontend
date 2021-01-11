@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { startOfDay, endOfDay } from 'date-fns'
+import enLocale from 'date-fns/locale/en-GB'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 
@@ -13,7 +14,7 @@ export const StreakDatepicker: React.FC<Props> = ({ reps, onMonthChange }) => {
 
   return (
     <div className="mx-auto">
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <MuiPickersUtilsProvider utils={DateFnsUtils} locale={enLocale}>
         <DatePicker
           disableToolbar
           orientation="landscape"
