@@ -14,11 +14,12 @@ import { Button } from '../../styleguide/button'
 import { TextField } from '../../styleguide/text-field'
 import { HabitColor } from '../../utils/funcs'
 
-const initialValues: HabitNewASP = {
+const initialValues: HabitNewASP & { description: string } = {
   name: '',
   color: '',
   duration: 10,
   frequency: 1,
+  description: '',
 }
 
 const validationSchema = Yup.object().shape({
@@ -74,6 +75,7 @@ export const NewHabitDialog: React.FC<Props> = ({
       onClose={onClose}
       disableBackdropClick
       disableEscapeKeyDown
+      classes={{ paper: 'h-full' }}
     >
       <Formik
         initialValues={initialValues}
@@ -83,9 +85,9 @@ export const NewHabitDialog: React.FC<Props> = ({
         onSubmit={onSubmit}
       >
         {({ setFieldValue }) => (
-          <Form>
+          <Form className="flex flex-col h-full">
             <DialogTitle>Create new habit</DialogTitle>
-            <DialogContent dividers>
+            <DialogContent dividers classes={{ root: 'flex-1' }}>
               <TextField name="name" label="Name" fullWidth />
               <TextField
                 name="color"
@@ -118,6 +120,12 @@ export const NewHabitDialog: React.FC<Props> = ({
                 <MenuItem value={3.5}>Twice a week</MenuItem>
                 <MenuItem value={7}>Once a week</MenuItem>
               </TextField>
+              <TextField
+                name="description"
+                label="Description (optional)"
+                fullWidth
+                multiline
+              />
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
