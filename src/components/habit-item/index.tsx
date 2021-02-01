@@ -7,6 +7,7 @@ import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked'
 import CheckedCircle from '@material-ui/icons/CheckCircle'
 import { Paper, IconButton } from '@material-ui/core'
 import { determineHabitColor, HabitColor } from '../../utils/funcs'
+import { habitFrequency } from '../../utils/habit-utils'
 
 type Props = {
   habit: HabitOverviewASR
@@ -63,7 +64,7 @@ export const HabitItem: React.FC<Props> = ({
               }}
             />
             <p className="text-sm">
-              {duration} minutes, every {frequency} days
+              {duration} minutes, {habitFrequency[frequency].toLowerCase()}
             </p>
           </div>
           <div className="flex items-center mt-1">

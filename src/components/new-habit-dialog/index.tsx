@@ -24,7 +24,7 @@ const initialValues: HabitNewASP & { description: string } = {
 }
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('required'),
+  name: Yup.string().max(25, 'max 25 characters').required('required'),
   color: Yup.string().required('required'),
   duration: Yup.number().required('required'),
   frequency: Yup.number().required('required'),
