@@ -12,7 +12,10 @@ export const getAllJournals = (
   _: string,
   filters: Filters
 ): Promise<JournalBriefASR[]> => {
-  const query = queryString.stringify(filters, { skipNull: true })
+  const query = queryString.stringify(filters, {
+    skipNull: true,
+    skipEmptyString: true,
+  })
 
   return axios
     .get(`${API_CONFIG.BASE_URL}/journals?${query}`)

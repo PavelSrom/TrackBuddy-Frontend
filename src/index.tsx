@@ -15,7 +15,10 @@ const app = (
   <ThemeProvider theme={theme}>
     <StylesProvider injectFirst>
       <Router>
-        <SnackbarProvider>
+        <SnackbarProvider
+          dense
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
           <AuthProvider>
             <App />
           </AuthProvider>

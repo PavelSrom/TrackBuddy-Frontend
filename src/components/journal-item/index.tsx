@@ -1,5 +1,5 @@
 import React from 'react'
-import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import { Paper, IconButton, Divider, Chip } from '@material-ui/core'
 import Star from '@material-ui/icons/Star'
 import StarBorder from '@material-ui/icons/StarBorder'
@@ -35,7 +35,7 @@ export const JournalItem: React.FC<Props> = ({
         <div className="pl-2 flex-1">
           <div className="flex justify-between items-center">
             <p className="text-base font-semibold">
-              {dayjs(new Date(created)).format('D MMMM YYYY')}
+              {format(new Date(created), 'd MMMM yyyy')}
             </p>
             <IconButton size="small" edge="end" onClick={onFaviconClick}>
               <StarIcon className="text-yellow-400" />

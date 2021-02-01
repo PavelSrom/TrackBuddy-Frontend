@@ -4,8 +4,7 @@ import { Formik } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
 import { useQuery, useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
-import dayjs from 'dayjs'
-import isToday from 'dayjs/plugin/isToday'
+import { isToday, format } from 'date-fns'
 import { Paper, IconButton, Chip } from '@material-ui/core'
 import Edit from '@material-ui/icons/Edit'
 import Close from '@material-ui/icons/Close'
@@ -21,8 +20,7 @@ import { PageTitle } from '../styleguide/page-title'
 import { moodIcons } from '../utils/mood-icons'
 import { ErrorResponse } from '../types/error-response'
 import { journalEntrySchema } from '../utils/validations'
-
-dayjs.extend(isToday)
+import { getUsersTags } from '../api/profile'
 
 export const ViewJournalPage: React.FC = () => {
   const params = useParams()
@@ -33,6 +31,8 @@ export const ViewJournalPage: React.FC = () => {
     ['getFullJournal', params.id],
     getJournalById
   )
+
+  const { data: tags } = useQuery('usersTags', getUsersTags)
 
   const [editJournal, { status: editStatus }] = useMutation(updateJournal, {
     onSuccess: () => {
@@ -63,13 +63,13 @@ export const ViewJournalPage: React.FC = () => {
     },
   })
 
-  const journalCreatedToday = dayjs(data?.created).isToday()
+  const journalCreatedToday = data ? isToday(data!.created) : false
   const EditIcon = isEditMode ? Close : Edit
 
   return !data ? null : (
     <>
       <PageTitle className="mt-4 mb-6">
-        {dayjs(new Date(data.created)).format('D MMMM YYYY')}
+        {format(new Date(data.created), 'd MMMM yyyy')}
       </PageTitle>
 
       <div className="my-4 space-x-2">
@@ -108,7 +108,10 @@ export const ViewJournalPage: React.FC = () => {
           validateOnBlur={false}
           validationSchema={journalEntrySchema}
         >
-          <JournalEntryForm loading={editStatus === 'loading'} />
+          <JournalEntryForm
+            loading={editStatus === 'loading'}
+            availableTags={tags ?? []}
+          />
         </Formik>
       ) : (
         <>

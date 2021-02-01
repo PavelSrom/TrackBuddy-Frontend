@@ -19,7 +19,7 @@ const IconContainer: React.FC<{ value: number }> = ({ value, ...rest }) => {
 
 type Props = {
   loading: boolean
-  availableTags?: string[]
+  availableTags: string[]
 }
 
 export const JournalEntryForm: React.FC<Props> = ({
@@ -112,7 +112,7 @@ export const JournalEntryForm: React.FC<Props> = ({
       {/* tags */}
       <Paper className="mb-6 p-4">
         <p className="text-xl font-semibold mb-2">Do you wish to add tags?</p>
-        {availableTags!.length === 0 && (
+        {availableTags.length === 0 && (
           <p className="mb-2">(No tags available)</p>
         )}
         <TextField

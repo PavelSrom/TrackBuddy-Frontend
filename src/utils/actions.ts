@@ -24,7 +24,7 @@ export const actions: Action[] = [
   {
     label: 'Check off a habit',
     url: '/habits',
-    enabled: false,
+    enabled: true,
     icon: Sync,
     gradient: `linear-gradient(to right, ${yellow['400']}, ${yellow['700']})`,
   },

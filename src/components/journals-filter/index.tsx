@@ -84,6 +84,22 @@ export const JournalsFilter: React.FC<Props> = ({
             ))}
           </TextField>
         </div>
+        <TextField
+          fullWidth
+          noFormik
+          disabled={tags?.length === 0}
+          select
+          value={filters.tag}
+          onChange={e => setFilters({ ...filters, tag: e.target.value })}
+          className="mt-4"
+          label="Tag"
+        >
+          {tags?.map(tag => (
+            <MenuItem key={tag} value={tag}>
+              {tag}
+            </MenuItem>
+          ))}
+        </TextField>
         <FormControlLabel
           control={
             <Checkbox
