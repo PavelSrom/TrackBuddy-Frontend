@@ -104,6 +104,7 @@ export const ViewHabit: React.FC = () => {
       <p className="text-lg font-semibold mb-2">Your streak</p>
       <StreakDatepicker
         reps={reps ?? []}
+        allowPastEdits
         onMonthChange={newDate => {
           setRange({
             min: startOfMonth(new Date(newDate as Date)).getTime(),
