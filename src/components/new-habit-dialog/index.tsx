@@ -13,6 +13,7 @@ import { HabitNewASP } from 'trackbuddy-shared/payloads/habits'
 import { Button } from '../../styleguide/button'
 import { TextField } from '../../styleguide/text-field'
 import { HabitColor } from '../../utils/funcs'
+import { habitFrequency } from '../../utils/habit-utils'
 
 const initialValues: HabitNewASP & { description: string } = {
   name: '',
@@ -115,10 +116,11 @@ export const NewHabitDialog: React.FC<Props> = ({
                 onChange={e => setFieldValue('duration', +e.target.value)}
               />
               <TextField name="frequency" label="Frequency" fullWidth select>
-                <MenuItem value={1}>Once a day</MenuItem>
-                <MenuItem value={2}>Every other day</MenuItem>
-                <MenuItem value={3.5}>Twice a week</MenuItem>
-                <MenuItem value={7}>Once a week</MenuItem>
+                {Object.entries(habitFrequency).map(([num, desc]) => (
+                  <MenuItem key={desc} value={num}>
+                    {desc}
+                  </MenuItem>
+                ))}
               </TextField>
               <TextField
                 name="description"

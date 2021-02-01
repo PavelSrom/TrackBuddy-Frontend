@@ -9,7 +9,10 @@ import { API_CONFIG } from './config'
 export const getHabitsDashboard = (): Promise<HabitOverviewASR[]> =>
   axios.get(`${API_CONFIG.BASE_URL}/habits`).then(({ data }) => data)
 
-export const getHabitById = (_key: string, id: string): Promise<HabitFullASR> =>
+export const getHabitById = (
+  _key: string,
+  id: string
+): Promise<HabitFullASR & { description: string }> =>
   axios.get(`${API_CONFIG.BASE_URL}/habits/${id}`).then(({ data }) => data)
 
 export const createNewHabit = (formData: HabitNewASP): Promise<HabitFullASR> =>
