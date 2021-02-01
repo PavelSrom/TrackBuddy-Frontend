@@ -11,7 +11,7 @@ import { StreakDatepicker } from '../styleguide/streak-datepicker'
 import { ErrorResponse } from '../types/error-response'
 import { ConfirmDialog } from '../styleguide/confirm-dialog'
 import { PageTitle } from '../styleguide/page-title'
-import { habitFrequency } from '../utils/habit-utils'
+import { habitFrequency, saveHabitsToStorage } from '../utils/habit-utils'
 
 type Range = {
   min: number
@@ -34,10 +34,15 @@ export const ViewHabit: React.FC = () => {
     ['habitDetail', id],
     getHabitById
   )
-  console.log(habitDetail)
 
   const [deleteThisHabit, { status }] = useMutation(deleteHabit, {
     onSuccess: () => {
+      const habitsForToday = JSON.parse(
+        localStorage.getItem('trackbuddy-today') as string
+      )
+      // remove todo for today on successful deletion
+      // @ts-ignore
+      saveHabitsToStorage(habitsForToday.todos.filter(todo => todo._id !== id))
       navigate('/habits')
       enqueueSnackbar('Habit deleted', { variant: 'success' })
     },

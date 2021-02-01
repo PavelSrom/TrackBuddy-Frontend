@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isToday, differenceInDays, startOfDay } from 'date-fns'
-import { useDebounce } from 'use-debounce'
+import { isToday } from 'date-fns'
+// import { useDebounce } from 'use-debounce'
 import { useQuery, useMutation, queryCache } from 'react-query'
 import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
 import { useSnackbar } from 'notistack'
@@ -23,6 +23,7 @@ import { ErrorResponse } from '../types/error-response'
 import { HabitColor } from '../utils/funcs'
 import { HabitItem } from '../components/habit-item'
 import { HabitItemSkeleton } from '../styleguide/habit-item-skeleton'
+import { saveHabitsToStorage } from '../utils/habit-utils'
 
 const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   value,
@@ -40,28 +41,6 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   )
 }
 
-const saveHabitsToStorage = (habits: HabitOverviewASR[]): void => {
-  const habitsToDoToday = habits?.filter(habit => {
-    const lastRepDate = startOfDay(new Date(habit.newestRep))
-    const diffInDays = differenceInDays(new Date(), lastRepDate)
-
-    return diffInDays >= habit.frequency
-  })
-  // console.log('saving to storage')
-
-  localStorage.setItem(
-    'trackbuddy-today',
-    JSON.stringify({ day: Date.now(), todos: habitsToDoToday })
-  )
-}
-
-// TODO: refactor the 3 useEffects for local storage stuff
-// the logic has to be different
-// probably another API endpoint for that
-
-// 1. on first fetch during the day, save todos to local storage
-// 2. adjust that array whenever a habit is created or deleted
-
 export const HabitsPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
@@ -70,34 +49,13 @@ export const HabitsPage: React.FC = () => {
   const [habitsToGo, setHabitsToGo] = useState<number>(0)
   const [minutesToGo, setMinutesToGo] = useState<number>(0)
   const [totalTodayLength, setTotalTodayLength] = useState<number>(0)
-  const [storageSave, setStorageSave] = useState<boolean>(false)
-  const [shouldStorageSave] = useDebounce(storageSave, 500)
+  // const [storageSave, setStorageSave] = useState<boolean>(false)
+  // const [shouldStorageSave] = useDebounce(storageSave, 500)
 
   const { data: habits, status } = useQuery(
     'habitsDashboard',
     getHabitsDashboard
   )
-
-  useEffect(() => {
-    return () => {
-      localStorage.removeItem('trackbuddy-today')
-    }
-  }, [])
-
-  // manually triggering save/load LS todos (new habit / deleted habit etc.)
-  useEffect(() => {
-    setStorageSave(false)
-    if (shouldStorageSave) {
-      saveHabitsToStorage(habits!)
-
-      const storageTodos = JSON.parse(
-        localStorage.getItem('trackbuddy-today') as string
-      )
-
-      if (isToday(storageTodos.day)) setHabitsForToday(storageTodos.todos)
-    }
-    // eslint-disable-next-line
-  }, [shouldStorageSave])
 
   // loading and displaying habits to do for today
   useEffect(() => {
@@ -151,8 +109,9 @@ export const HabitsPage: React.FC = () => {
   const [submitNewHabit, { status: newHabitStatus }] = useMutation(
     createNewHabit,
     {
-      onSuccess: () => {
-        setStorageSave(true)
+      onSuccess: data => {
+        // manually re-update todos in local storage
+        saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
         enqueueSnackbar('Habit created', { variant: 'success' })
       },
       onError: (err: ErrorResponse) => {
