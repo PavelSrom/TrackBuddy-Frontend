@@ -159,7 +159,9 @@ export const HabitsPage: React.FC = () => {
           </PageTitle>
           <p className="font-semibold">Today&apos;s agenda:</p>
           <div className="flex justify-between">
-            <p className="text-sm">{habitsToGo} habits to go</p>
+            <p className="text-sm">
+              {habitsToGo} habit{habitsToGo > 1 && 's'} to go
+            </p>
             <p className="text-sm">{minutesToGo} minutes to go</p>
           </div>
           <div className="mt-2">
