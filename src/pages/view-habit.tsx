@@ -47,8 +47,8 @@ export const ViewHabit: React.FC = () => {
     },
     onError: (err: ErrorResponse) => {
       enqueueSnackbar(err.response.data.message, { variant: 'error' })
+      setDialogOpen(false)
     },
-    onSettled: () => setDialogOpen(false),
   })
 
   const { data: reps, refetch: refetchReps } = useQuery(
