@@ -10,8 +10,8 @@ import { toggleHabitCheck } from '../../api/habits'
 import { ConfirmDialog } from '../confirm-dialog'
 import { ErrorResponse } from '../../types/error-response'
 
-const dayIsCompleted = (reps: number[], day: Date): boolean => {
-  return !!reps.find(
+const dayIsCompleted = (reps: number[], day: Date): number | undefined => {
+  return reps.find(
     rep =>
       rep > startOfDay(new Date(day as Date)).getTime() &&
       rep < endOfDay(new Date(day as Date)).getTime()
@@ -22,12 +22,14 @@ type Props = {
   reps: number[]
   onMonthChange: (newDate: unknown) => void
   allowPastEdits?: boolean
+  refetchReps?: () => void
 }
 
 export const StreakDatepicker: React.FC<Props> = ({
   reps,
   onMonthChange,
   allowPastEdits,
+  refetchReps,
 }) => {
   const { id } = useParams()
   const { enqueueSnackbar } = useSnackbar()
@@ -46,6 +48,7 @@ export const StreakDatepicker: React.FC<Props> = ({
     },
     onSettled: () => {
       setDialogOpen(false)
+      refetchReps?.()
     },
   })
 
@@ -78,9 +81,13 @@ export const StreakDatepicker: React.FC<Props> = ({
             onChange={newDate => {
               // allow to retrospectively check/uncheck for non-today dates
               if (allowPastEdits && !isToday(new Date(newDate as Date))) {
+                const dayCompleted = dayIsCompleted(reps, newDate as Date)
+
                 setDialogOpen(true)
-                setDayIsChecked(dayIsCompleted(reps, newDate as Date))
-                setDate(newDate as Date)
+                setDayIsChecked(!!dayCompleted)
+                setDate(
+                  dayCompleted ? new Date(dayCompleted!) : (newDate as Date)
+                )
               }
             }}
             onMonthChange={onMonthChange}
@@ -93,9 +100,7 @@ export const StreakDatepicker: React.FC<Props> = ({
               const dayCompleted = dayIsCompleted(reps, day as Date)
 
               return dayCompleted ? (
-                <div className="bg-green-400 rounded-full w-9 h-9 flex justify-center items-center">
-                  {dayComponent}
-                </div>
+                <div className="bg-green-400 rounded-full">{dayComponent}</div>
               ) : (
                 dayComponent
               )

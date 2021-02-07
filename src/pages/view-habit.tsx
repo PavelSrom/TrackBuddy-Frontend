@@ -40,7 +40,6 @@ export const ViewHabit: React.FC = () => {
       const habitsForToday = JSON.parse(
         localStorage.getItem('trackbuddy-today') as string
       )
-      // remove todo for today on successful deletion
       // @ts-ignore
       saveHabitsToStorage(habitsForToday.todos.filter(todo => todo._id !== id))
       navigate('/habits')
@@ -52,7 +51,7 @@ export const ViewHabit: React.FC = () => {
     onSettled: () => setDialogOpen(false),
   })
 
-  const { data: reps } = useQuery(
+  const { data: reps, refetch: refetchReps } = useQuery(
     ['habitReps', id, range],
     getHabitRepetitions,
     {
@@ -110,6 +109,7 @@ export const ViewHabit: React.FC = () => {
       <StreakDatepicker
         reps={reps ?? []}
         allowPastEdits
+        refetchReps={() => refetchReps()}
         onMonthChange={newDate => {
           setRange({
             min: startOfMonth(new Date(newDate as Date)).getTime(),
