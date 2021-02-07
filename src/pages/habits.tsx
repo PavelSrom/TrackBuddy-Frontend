@@ -24,6 +24,7 @@ import { HabitColor } from '../utils/funcs'
 import { HabitItem } from '../components/habit-item'
 import { HabitItemSkeleton } from '../styleguide/habit-item-skeleton'
 import { saveHabitsToStorage } from '../utils/habit-utils'
+import { SomethingWentWrong } from '../styleguide/something-went-wrong'
 
 const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   value,
@@ -206,7 +207,7 @@ export const HabitsPage: React.FC = () => {
           )
         })
       ) : (
-        <p>Something went wrong</p>
+        <SomethingWentWrong />
       )}
 
       <Fab

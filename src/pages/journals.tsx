@@ -18,8 +18,9 @@ import { PageTitle } from '../styleguide/page-title'
 import { Filters, initialFilters } from '../utils/journal-filters'
 import { JournalItemSkeleton } from '../styleguide/journal-item-skeleton'
 import { ErrorResponse } from '../types/error-response'
+import { SomethingWentWrong } from '../styleguide/something-went-wrong'
 
-// TODO: custom spinners & <SomethingWentWrong />, tags logic
+// TODO: custom spinners, tags logic
 
 export const JournalsPage: React.FC = () => {
   const navigate = useNavigate()
@@ -113,7 +114,7 @@ export const JournalsPage: React.FC = () => {
           )}
         </>
       ) : (
-        <p>Something went wrong</p>
+        <SomethingWentWrong />
       )}
 
       <Fab
