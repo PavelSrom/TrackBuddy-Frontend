@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { QueryClientProvider, QueryClient } from 'react-query'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ThemeProvider, StylesProvider } from '@material-ui/core'
 import { SnackbarProvider } from 'notistack'
@@ -11,21 +12,31 @@ import './index.css'
 
 require('./utils/axios-interceptor')
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
 const app = (
-  <ThemeProvider theme={theme}>
-    <StylesProvider injectFirst>
-      <Router>
-        <SnackbarProvider
-          dense
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </SnackbarProvider>
-      </Router>
-    </StylesProvider>
-  </ThemeProvider>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider theme={theme}>
+      <StylesProvider injectFirst>
+        <Router>
+          <SnackbarProvider
+            dense
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          >
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </SnackbarProvider>
+        </Router>
+      </StylesProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 )
 
 ReactDOM.render(app, document.getElementById('root'))

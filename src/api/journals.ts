@@ -9,7 +9,6 @@ import { Filters } from '../utils/journal-filters'
 import { API_CONFIG } from './config'
 
 export const getAllJournals = (
-  _: string,
   filters: Filters
 ): Promise<JournalBriefASR[]> => {
   const query = queryString.stringify(filters, {
@@ -25,10 +24,7 @@ export const getAllJournals = (
 export const journalMadeToday = (): Promise<{ found: boolean }> =>
   axios.get(`${API_CONFIG.BASE_URL}/journals/today`).then(({ data }) => data)
 
-export const getJournalById = (
-  _: string,
-  id: string
-): Promise<JournalFullASR> =>
+export const getJournalById = (id: string): Promise<JournalFullASR> =>
   axios.get(`${API_CONFIG.BASE_URL}/journals/${id}`).then(({ data }) => data)
 
 export const createNewJournal = (
