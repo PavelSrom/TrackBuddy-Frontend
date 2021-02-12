@@ -51,8 +51,6 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "deploy": "firebase deploy",
-    "deploy:live": "npm run build && npm run deploy",
     "prettier:fix": "prettier --write ./src"
   },
   "browserslist": {
