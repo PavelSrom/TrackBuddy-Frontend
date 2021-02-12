@@ -5,7 +5,7 @@ import Edit from '@material-ui/icons/Edit'
 import Delete from '@material-ui/icons/Delete'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, queryCache } from 'react-query'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { getHabitRepetitions, getHabitById, deleteHabit } from '../api/habits'
 import { StreakDatepicker } from '../styleguide/streak-datepicker'
 import { ErrorResponse } from '../types/error-response'
@@ -18,8 +18,24 @@ type Range = {
   max: number
 }
 
-// TODO: custom spinner
+const useHabitDetail = (id: string) =>
+  useQuery(['habitDetail', id], () => getHabitById(id))
 
+const useHabitReps = (id: string, range: Range) => {
+  const queryClient = useQueryClient()
+
+  return useQuery(
+    ['habitReps', id, range],
+    () => getHabitRepetitions(id, range),
+    {
+      onSuccess: data => {
+        queryClient.setQueryData(['habitReps', id], data)
+      },
+    }
+  )
+}
+
+// TODO: custom spinner
 export const ViewHabit: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -30,38 +46,31 @@ export const ViewHabit: React.FC = () => {
     max: endOfMonth(new Date()).getTime(),
   })
 
-  const { data: habitDetail, status: detailStatus } = useQuery(
-    ['habitDetail', id],
-    getHabitById
-  )
+  const { data: habitDetail, ...habitDetailQuery } = useHabitDetail(id)
+  const { data: reps, ...habitRepsQuery } = useHabitReps(id, range)
 
-  const [deleteThisHabit, { status }] = useMutation(deleteHabit, {
-    onSuccess: () => {
-      const habitsForToday = JSON.parse(
-        localStorage.getItem('trackbuddy-today') as string
-      )
-      // @ts-ignore
-      saveHabitsToStorage(habitsForToday.todos.filter(todo => todo._id !== id))
-      navigate('/habits')
-      enqueueSnackbar('Habit deleted', { variant: 'success' })
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-      setDialogOpen(false)
-    },
-  })
-
-  const { data: reps, refetch: refetchReps } = useQuery(
-    ['habitReps', id, range],
-    getHabitRepetitions,
+  const { mutate: deleteThisHabit, isLoading: isDeletingHabit } = useMutation(
+    deleteHabit,
     {
-      onSuccess: data => {
-        queryCache.setQueryData(['habitReps', id], data)
+      onSuccess: () => {
+        const habitsForToday = JSON.parse(
+          localStorage.getItem('trackbuddy-today') as string
+        )
+        saveHabitsToStorage(
+          // @ts-ignore
+          habitsForToday.todos.filter(todo => todo._id !== id)
+        )
+        navigate('/habits')
+        enqueueSnackbar('Habit deleted', { variant: 'success' })
+      },
+      onError: (err: ErrorResponse) => {
+        enqueueSnackbar(err.response.data.message, { variant: 'error' })
+        setDialogOpen(false)
       },
     }
   )
 
-  if (detailStatus === 'loading') return <p>Loading...</p>
+  if (habitDetailQuery.isLoading) return <p>Loading...</p>
 
   return (
     <>
@@ -69,7 +78,7 @@ export const ViewHabit: React.FC = () => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={() => deleteThisHabit(id)}
-        loading={status === 'loading'}
+        loading={isDeletingHabit}
       />
 
       <PageTitle className="mt-4 mb-6">{habitDetail!.name}</PageTitle>
@@ -109,7 +118,7 @@ export const ViewHabit: React.FC = () => {
       <StreakDatepicker
         reps={reps ?? []}
         allowPastEdits
-        refetchReps={() => refetchReps()}
+        refetchReps={() => habitRepsQuery.refetch()}
         onMonthChange={newDate => {
           setRange({
             min: startOfMonth(new Date(newDate as Date)).getTime(),

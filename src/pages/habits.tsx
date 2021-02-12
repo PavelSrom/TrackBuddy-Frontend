@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isToday } from 'date-fns'
 // import { useDebounce } from 'use-debounce'
-import { useQuery, useMutation, queryCache } from 'react-query'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
 import { useSnackbar } from 'notistack'
 import {
@@ -42,20 +42,55 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   )
 }
 
+const useHabits = () => useQuery('habitsDashboard', getHabitsDashboard)
+
+const useToggleHabit = () => {
+  const queryClient = useQueryClient()
+  const { enqueueSnackbar } = useSnackbar()
+
+  return useMutation(toggleHabitCheck, {
+    onSuccess: (_data, { lastCheckToday }) => {
+      enqueueSnackbar(lastCheckToday ? 'Habit unchecked' : 'Habit checked', {
+        variant: 'success',
+      })
+    },
+    onError: () => {
+      enqueueSnackbar('Cannot update repetitions', { variant: 'error' })
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries('habitsDashboard')
+    },
+  })
+}
+
 export const HabitsPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar()
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [habitsForToday, setHabitsForToday] = useState<HabitOverviewASR[]>([])
   const [habitsToGo, setHabitsToGo] = useState<number>(0)
   const [minutesToGo, setMinutesToGo] = useState<number>(0)
   const [totalTodayLength, setTotalTodayLength] = useState<number>(0)
-  // const [storageSave, setStorageSave] = useState<boolean>(false)
-  // const [shouldStorageSave] = useDebounce(storageSave, 500)
 
-  const { data: habits, status } = useQuery(
-    'habitsDashboard',
-    getHabitsDashboard
+  const { data: habits, ...habitsQuery } = useHabits()
+  const { mutate: toggleHabit } = useToggleHabit()
+  const { mutate: submitNewHabit, isLoading: isCreatingHabit } = useMutation(
+    createNewHabit,
+    {
+      onSuccess: data => {
+        // manually re-update todos in local storage
+        saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
+        enqueueSnackbar('Habit created', { variant: 'success' })
+      },
+      onError: (err: ErrorResponse) => {
+        enqueueSnackbar(err.response.data.message, { variant: 'error' })
+      },
+      onSettled: () => {
+        setDialogOpen(false)
+        queryClient.invalidateQueries('habitsDashboard')
+      },
+    }
   )
 
   // loading and displaying habits to do for today
@@ -107,38 +142,6 @@ export const HabitsPage: React.FC = () => {
     }
   }, [habitsForToday, habits])
 
-  const [submitNewHabit, { status: newHabitStatus }] = useMutation(
-    createNewHabit,
-    {
-      onSuccess: data => {
-        // manually re-update todos in local storage
-        saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
-        enqueueSnackbar('Habit created', { variant: 'success' })
-      },
-      onError: (err: ErrorResponse) => {
-        enqueueSnackbar(err.response.data.message, { variant: 'error' })
-      },
-      onSettled: () => {
-        setDialogOpen(false)
-        queryCache.invalidateQueries('habitsDashboard')
-      },
-    }
-  )
-
-  const [toggleHabit] = useMutation(toggleHabitCheck, {
-    onSuccess: (_data, { lastCheckToday }) => {
-      enqueueSnackbar(lastCheckToday ? 'Habit unchecked' : 'Habit checked', {
-        variant: 'success',
-      })
-    },
-    onError: () => {
-      enqueueSnackbar('Cannot update repetitions', { variant: 'error' })
-    },
-    onSettled: () => {
-      queryCache.invalidateQueries('habitsDashboard')
-    },
-  })
-
   const colorsTaken = habits && habits.map(({ color }) => color)
   const progressValue =
     ((totalTodayLength - minutesToGo) / totalTodayLength) * 100
@@ -176,7 +179,7 @@ export const HabitsPage: React.FC = () => {
 
       <NewHabitDialog
         open={dialogOpen}
-        loading={newHabitStatus === 'loading'}
+        loading={isCreatingHabit}
         onClose={() => setDialogOpen(false)}
         onSubmit={values => submitNewHabit(values)}
         colorsTaken={(colorsTaken ?? []) as HabitColor[]}
@@ -184,9 +187,9 @@ export const HabitsPage: React.FC = () => {
 
       <PageTitle className="mt-4 mb-6">My habits</PageTitle>
 
-      {status === 'loading' ? (
-        <HabitItemSkeleton />
-      ) : status === 'success' ? (
+      {habitsQuery.isLoading && <HabitItemSkeleton />}
+      {habitsQuery.isError && <SomethingWentWrong />}
+      {habitsQuery.isSuccess &&
         habits!.map(habit => {
           const lastCheckIsToday = isToday(new Date(habit.newestRep))
 
@@ -205,10 +208,7 @@ export const HabitsPage: React.FC = () => {
               }
             />
           )
-        })
-      ) : (
-        <SomethingWentWrong />
-      )}
+        })}
 
       <Fab
         disabled={habits ? habits.length >= 5 : false}
