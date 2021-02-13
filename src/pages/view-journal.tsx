@@ -2,66 +2,33 @@ import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Formik } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { useQuery, useMutation, queryCache } from 'react-query'
-import { useSnackbar } from 'notistack'
 import { isToday, format } from 'date-fns'
 import { Paper, IconButton, Chip } from '@material-ui/core'
 import Edit from '@material-ui/icons/Edit'
 import Close from '@material-ui/icons/Close'
 import Star from '@material-ui/icons/Star'
 import StarBorder from '@material-ui/icons/StarBorder'
-import {
-  getJournalById,
-  toggleJournalIsStarred,
-  updateJournal,
-} from '../api/journals'
 import { JournalEntryForm } from '../components/journal-entry-form'
 import { PageTitle } from '../styleguide/page-title'
 import { moodIcons } from '../utils/mood-icons'
-import { ErrorResponse } from '../types/error-response'
 import { journalEntrySchema } from '../utils/validations'
-import { getUsersTags } from '../api/profile'
+import { useTags } from '../hooks/api/profile'
+import {
+  useJournalById,
+  useJournalToggleFavorite,
+  useUpdateJournal,
+} from '../hooks/api/journals'
 
 export const ViewJournalPage: React.FC = () => {
-  const params = useParams()
-  const { enqueueSnackbar } = useSnackbar()
+  const { id } = useParams()
   const [isEditMode, setIsEditMode] = useState<boolean>(false)
 
-  const { data, refetch } = useQuery(
-    ['getFullJournal', params.id],
-    getJournalById
+  const { data, refetch } = useJournalById(id)
+  const { data: tags } = useTags()
+  const { mutate: editJournal, isLoading: isEditingJournal } = useUpdateJournal(
+    id
   )
-
-  const { data: tags } = useQuery('usersTags', getUsersTags)
-
-  const [editJournal, { status: editStatus }] = useMutation(updateJournal, {
-    onSuccess: () => {
-      queryCache.invalidateQueries(['getFullJournal', params.id])
-      enqueueSnackbar('Journal updated', { variant: 'success' })
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-    onSettled: () => {
-      window.scrollTo({ top: 0 })
-      setIsEditMode(false)
-    },
-  })
-
-  const [toggleStarred] = useMutation(toggleJournalIsStarred, {
-    onSuccess: (_data, { isStarred }) => {
-      enqueueSnackbar(
-        isStarred ? 'Journal removed from starred' : 'Journal added to starred',
-        { variant: 'success' }
-      )
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-    onSettled: () => {
-      refetch()
-    },
-  })
+  const { mutate: toggleStarred } = useJournalToggleFavorite()
 
   const journalCreatedToday = data ? isToday(data!.created) : false
   const EditIcon = isEditMode ? Close : Edit
@@ -78,7 +45,14 @@ export const ViewJournalPage: React.FC = () => {
           edge="start"
           className="text-yellow-400"
           onClick={() =>
-            toggleStarred({ id: data._id, isStarred: data.isStarred })
+            toggleStarred(
+              { id: data._id, isStarred: data.isStarred },
+              {
+                onSettled: () => {
+                  refetch()
+                },
+              }
+            )
           }
         >
           {data.isStarred ? <Star /> : <StarBorder />}
@@ -102,14 +76,22 @@ export const ViewJournalPage: React.FC = () => {
             tags: data!.tags,
           }}
           onSubmit={(values: JournalFullASP): void => {
-            editJournal({ id: data._id, formData: values })
+            editJournal(
+              { id: data._id, formData: values },
+              {
+                onSettled: () => {
+                  window.scrollTo({ top: 0 })
+                  setIsEditMode(false)
+                },
+              }
+            )
           }}
           validateOnChange={false}
           validateOnBlur={false}
           validationSchema={journalEntrySchema}
         >
           <JournalEntryForm
-            loading={editStatus === 'loading'}
+            loading={isEditingJournal}
             availableTags={tags ?? []}
           />
         </Formik>

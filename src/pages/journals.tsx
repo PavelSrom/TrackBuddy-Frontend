@@ -1,47 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from 'react-query'
-import { useSnackbar } from 'notistack'
 import { format } from 'date-fns'
 import Add from '@material-ui/icons/Add'
 import Search from '@material-ui/icons/Search'
 import { Fab, IconButton } from '@material-ui/core'
-import { getUsersTags } from '../api/profile'
-import {
-  getAllJournals,
-  journalMadeToday,
-  toggleJournalIsStarred,
-} from '../api/journals'
 import { JournalsFilter } from '../components/journals-filter'
 import { JournalItem } from '../components/journal-item'
 import { PageTitle } from '../styleguide/page-title'
 import { Filters, initialFilters } from '../utils/journal-filters'
 import { JournalItemSkeleton } from '../styleguide/journal-item-skeleton'
-import { ErrorResponse } from '../types/error-response'
 import { SomethingWentWrong } from '../styleguide/something-went-wrong'
-
-const useTodayJournal = () => useQuery('journalMadeToday', journalMadeToday)
-const useTags = () => useQuery('usersTags', getUsersTags)
-const useJournals = (filters: Filters) =>
-  useQuery(['allJournals', filters], () => getAllJournals(filters), {
-    enabled: false,
-  })
-
-const useJournalToggle = () => {
-  const { enqueueSnackbar } = useSnackbar()
-
-  return useMutation(toggleJournalIsStarred, {
-    onSuccess: (_data, { isStarred }) => {
-      enqueueSnackbar(
-        isStarred ? 'Journal removed from starred' : 'Journal added to starred',
-        { variant: 'success' }
-      )
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-  })
-}
+import { useTags } from '../hooks/api/profile'
+import {
+  useJournals,
+  useJournalToggle,
+  useTodayJournal,
+} from '../hooks/api/journals'
 
 // TODO: custom spinners, tags logic
 export const JournalsPage: React.FC = () => {
