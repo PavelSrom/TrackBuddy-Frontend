@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isToday } from 'date-fns'
-// import { useDebounce } from 'use-debounce'
-import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
-import { useSnackbar } from 'notistack'
 import {
   Fab,
   Box,
@@ -12,19 +9,14 @@ import {
   LinearProgressProps,
 } from '@material-ui/core'
 import Add from '@material-ui/icons/Add'
-import {
-  getHabitsDashboard,
-  createNewHabit,
-  toggleHabitCheck,
-} from '../api/habits'
 import { PageTitle } from '../styleguide/page-title'
 import { NewHabitDialog } from '../components/new-habit-dialog'
-import { ErrorResponse } from '../types/error-response'
 import { HabitColor } from '../utils/funcs'
 import { HabitItem } from '../components/habit-item'
 import { HabitItemSkeleton } from '../styleguide/habit-item-skeleton'
 import { saveHabitsToStorage } from '../utils/habit-utils'
 import { SomethingWentWrong } from '../styleguide/something-went-wrong'
+import { useCreateHabit, useHabits, useToggleHabit } from '../hooks/api/habits'
 
 const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   value,
@@ -42,30 +34,7 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   )
 }
 
-const useHabits = () => useQuery('habitsDashboard', getHabitsDashboard)
-
-const useToggleHabit = () => {
-  const queryClient = useQueryClient()
-  const { enqueueSnackbar } = useSnackbar()
-
-  return useMutation(toggleHabitCheck, {
-    onSuccess: (_data, { lastCheckToday }) => {
-      enqueueSnackbar(lastCheckToday ? 'Habit unchecked' : 'Habit checked', {
-        variant: 'success',
-      })
-    },
-    onError: () => {
-      enqueueSnackbar('Cannot update repetitions', { variant: 'error' })
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries('habitsDashboard')
-    },
-  })
-}
-
 export const HabitsPage: React.FC = () => {
-  const { enqueueSnackbar } = useSnackbar()
-  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [habitsForToday, setHabitsForToday] = useState<HabitOverviewASR[]>([])
@@ -75,23 +44,10 @@ export const HabitsPage: React.FC = () => {
 
   const { data: habits, ...habitsQuery } = useHabits()
   const { mutate: toggleHabit } = useToggleHabit()
-  const { mutate: submitNewHabit, isLoading: isCreatingHabit } = useMutation(
-    createNewHabit,
-    {
-      onSuccess: data => {
-        // manually re-update todos in local storage
-        saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
-        enqueueSnackbar('Habit created', { variant: 'success' })
-      },
-      onError: (err: ErrorResponse) => {
-        enqueueSnackbar(err.response.data.message, { variant: 'error' })
-      },
-      onSettled: () => {
-        setDialogOpen(false)
-        queryClient.invalidateQueries('habitsDashboard')
-      },
-    }
-  )
+  const {
+    mutate: submitNewHabit,
+    isLoading: isCreatingHabit,
+  } = useCreateHabit()
 
   // loading and displaying habits to do for today
   useEffect(() => {
@@ -181,7 +137,20 @@ export const HabitsPage: React.FC = () => {
         open={dialogOpen}
         loading={isCreatingHabit}
         onClose={() => setDialogOpen(false)}
-        onSubmit={values => submitNewHabit(values)}
+        onSubmit={values =>
+          submitNewHabit(values, {
+            onSuccess: data => {
+              // // manually re-update todos in local storage
+              saveHabitsToStorage([
+                ...habitsForToday,
+                { ...data, newestRep: 0 },
+              ])
+            },
+            onSettled: () => {
+              setDialogOpen(false)
+            },
+          })
+        }
         colorsTaken={(colorsTaken ?? []) as HabitColor[]}
       />
 
