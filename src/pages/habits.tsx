@@ -44,10 +44,9 @@ export const HabitsPage: React.FC = () => {
 
   const { data: habits, ...habitsQuery } = useHabits()
   const { mutate: toggleHabit } = useToggleHabit()
-  const {
-    mutate: submitNewHabit,
-    isLoading: isCreatingHabit,
-  } = useCreateHabit()
+  const { mutate: submitNewHabit, isLoading: isCreatingHabit } = useCreateHabit(
+    habitsForToday
+  )
 
   // loading and displaying habits to do for today
   useEffect(() => {
@@ -139,13 +138,6 @@ export const HabitsPage: React.FC = () => {
         onClose={() => setDialogOpen(false)}
         onSubmit={values =>
           submitNewHabit(values, {
-            onSuccess: data => {
-              // // manually re-update todos in local storage
-              saveHabitsToStorage([
-                ...habitsForToday,
-                { ...data, newestRep: 0 },
-              ])
-            },
             onSettled: () => {
               setDialogOpen(false)
             },

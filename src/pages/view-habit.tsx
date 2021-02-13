@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 import { StreakDatepicker } from '../styleguide/streak-datepicker'
 import { ConfirmDialog } from '../styleguide/confirm-dialog'
 import { PageTitle } from '../styleguide/page-title'
-import { habitFrequency, saveHabitsToStorage } from '../utils/habit-utils'
+import { habitFrequency } from '../utils/habit-utils'
 import {
   useDeleteHabit,
   useHabitDetail,
@@ -45,15 +45,6 @@ export const ViewHabit: React.FC = () => {
         onClose={() => setDialogOpen(false)}
         onConfirm={() =>
           deleteThisHabit(id, {
-            onSuccess: () => {
-              const habitsForToday = JSON.parse(
-                localStorage.getItem('trackbuddy-today') as string
-              )
-              saveHabitsToStorage(
-                // @ts-ignore
-                habitsForToday.todos.filter(todo => todo._id !== id)
-              )
-            },
             onSettled: () => {
               setDialogOpen(false)
             },

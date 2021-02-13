@@ -2,6 +2,7 @@
 import { useSnackbar } from 'notistack'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { useNavigate } from 'react-router-dom'
+import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
 import {
   createNewHabit,
   deleteHabit,
@@ -11,18 +12,21 @@ import {
   toggleHabitCheck,
 } from '../../api/habits'
 import { ErrorResponse } from '../../types/error-response'
+import { saveHabitsToStorage } from '../../utils/habit-utils'
 
 export const useHabits = () => useQuery('habitsDashboard', getHabitsDashboard)
 
 export const useHabitDetail = (id: string) =>
   useQuery(['habitDetail', id], () => getHabitById(id))
 
-export const useCreateHabit = () => {
+export const useCreateHabit = (habitsForToday: HabitOverviewASR[]) => {
   const queryClient = useQueryClient()
   const { enqueueSnackbar } = useSnackbar()
 
   return useMutation(createNewHabit, {
-    onSuccess: () => {
+    onSuccess: data => {
+      // // manually re-update todos in local storage
+      saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
       enqueueSnackbar('Habit created', { variant: 'success' })
     },
     onError: (err: ErrorResponse) => {
@@ -39,7 +43,15 @@ export const useDeleteHabit = () => {
   const { enqueueSnackbar } = useSnackbar()
 
   return useMutation(deleteHabit, {
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
+      const habitsForToday = JSON.parse(
+        localStorage.getItem('trackbuddy-today') as string
+      )
+      saveHabitsToStorage(
+        // @ts-ignore
+        habitsForToday.todos.filter(todo => todo._id !== id)
+      )
+
       navigate('/habits')
       enqueueSnackbar('Habit deleted', { variant: 'success' })
     },

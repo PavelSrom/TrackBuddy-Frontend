@@ -13,7 +13,7 @@ import { SomethingWentWrong } from '../styleguide/something-went-wrong'
 import { useTags } from '../hooks/api/profile'
 import {
   useJournals,
-  useJournalToggle,
+  useJournalToggleFavorite,
   useTodayJournal,
 } from '../hooks/api/journals'
 
@@ -31,7 +31,7 @@ export const JournalsPage: React.FC = () => {
   const journalsQuery = useJournals(filters)
   const todayJournalQuery = useTodayJournal()
   const tagsQuery = useTags()
-  const { mutate: toggleStarred } = useJournalToggle()
+  const { mutate: toggleStarred } = useJournalToggleFavorite()
 
   useEffect(() => {
     journalsQuery.refetch()
