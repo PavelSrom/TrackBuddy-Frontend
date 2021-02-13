@@ -10,7 +10,6 @@ export const getHabitsDashboard = (): Promise<HabitOverviewASR[]> =>
   axios.get(`${API_CONFIG.BASE_URL}/habits`).then(({ data }) => data)
 
 export const getHabitById = (
-  _key: string,
   id: string
 ): Promise<HabitFullASR & { description: string }> =>
   axios.get(`${API_CONFIG.BASE_URL}/habits/${id}`).then(({ data }) => data)
@@ -47,7 +46,6 @@ export const toggleHabitCheck = ({
   lastCheckToday ? uncheckHabit({ id, day }) : checkHabit({ id, day })
 
 export const getHabitRepetitions = (
-  _key: string,
   id: string,
   { min, max }: { min: number; max: number }
 ): Promise<number[]> =>

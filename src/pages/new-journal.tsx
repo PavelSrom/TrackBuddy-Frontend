@@ -1,18 +1,14 @@
 import React from 'react'
 import { format } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, queryCache } from 'react-query'
 import { useSnackbar } from 'notistack'
 import { Formik } from 'formik'
 import { JournalFullASP } from 'trackbuddy-shared/payloads/journals'
-import { getUsersTags } from '../api/profile'
-import { createNewJournal, undoJournalEntry } from '../api/journals'
 import { JournalEntryForm } from '../components/journal-entry-form'
 import { PageTitle } from '../styleguide/page-title'
 import { Button } from '../styleguide/button'
-import { ErrorResponse } from '../types/error-response'
-import { initialFilters } from '../utils/journal-filters'
 import { journalEntrySchema } from '../utils/validations'
+import { useTags } from '../hooks/api/profile'
+import { useCreateJournal, useUndoJournal } from '../hooks/api/journals'
 
 const initialValues: JournalFullASP = {
   mood: 3,
@@ -25,50 +21,36 @@ const initialValues: JournalFullASP = {
 }
 
 export const NewJournalPage: React.FC = () => {
-  const navigate = useNavigate()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const todayDate = format(new Date(), 'd MMMM yyyy')
 
-  const { data: tags } = useQuery('usersTags', getUsersTags)
-
-  const [undo] = useMutation(undoJournalEntry, {
-    onSuccess: () => {
-      queryCache.refetchQueries(['allJournals', initialFilters])
-      queryCache.invalidateQueries('journalMadeToday')
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-  })
-
-  const [submitEntry, { status }] = useMutation(createNewJournal, {
-    onSuccess: ({ _id }) => {
-      enqueueSnackbar('Journal entry created', {
-        variant: 'default',
-        action: key => (
-          <Button
-            variant="text"
-            color="secondary"
-            onClick={() => {
-              // make a request and close the snackbar no matter what
-              undo(_id).finally(() => closeSnackbar(key))
-            }}
-          >
-            Undo
-          </Button>
-        ),
-      })
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-    onSettled: () => {
-      navigate('/journals')
-    },
-  })
+  const { data: tags } = useTags()
+  const { mutateAsync: undo } = useUndoJournal()
+  const {
+    mutate: submitEntry,
+    isLoading: isCreatingJournal,
+  } = useCreateJournal()
 
   const handleSubmit = (values: JournalFullASP): void => {
-    submitEntry(values)
+    submitEntry(values, {
+      onSuccess: ({ _id }) => {
+        enqueueSnackbar('Journal entry created', {
+          variant: 'default',
+          action: key => (
+            <Button
+              variant="text"
+              color="secondary"
+              onClick={() => {
+                // make a request and close the snackbar no matter what
+                undo(_id).finally(() => closeSnackbar(key))
+              }}
+            >
+              Undo
+            </Button>
+          ),
+        })
+      },
+    })
   }
 
   return (
@@ -83,7 +65,7 @@ export const NewJournalPage: React.FC = () => {
         validationSchema={journalEntrySchema}
       >
         <JournalEntryForm
-          loading={status === 'loading'}
+          loading={isCreatingJournal}
           availableTags={tags ?? []}
         />
       </Formik>

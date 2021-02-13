@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isToday } from 'date-fns'
-// import { useDebounce } from 'use-debounce'
-import { useQuery, useMutation, queryCache } from 'react-query'
 import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
-import { useSnackbar } from 'notistack'
 import {
   Fab,
   Box,
@@ -12,19 +9,14 @@ import {
   LinearProgressProps,
 } from '@material-ui/core'
 import Add from '@material-ui/icons/Add'
-import {
-  getHabitsDashboard,
-  createNewHabit,
-  toggleHabitCheck,
-} from '../api/habits'
 import { PageTitle } from '../styleguide/page-title'
 import { NewHabitDialog } from '../components/new-habit-dialog'
-import { ErrorResponse } from '../types/error-response'
 import { HabitColor } from '../utils/funcs'
 import { HabitItem } from '../components/habit-item'
 import { HabitItemSkeleton } from '../styleguide/habit-item-skeleton'
 import { saveHabitsToStorage } from '../utils/habit-utils'
 import { SomethingWentWrong } from '../styleguide/something-went-wrong'
+import { useCreateHabit, useHabits, useToggleHabit } from '../hooks/api/habits'
 
 const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
   value,
@@ -43,19 +35,17 @@ const LinearProgressWithLabel: React.FC<LinearProgressProps> = ({
 }
 
 export const HabitsPage: React.FC = () => {
-  const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [habitsForToday, setHabitsForToday] = useState<HabitOverviewASR[]>([])
   const [habitsToGo, setHabitsToGo] = useState<number>(0)
   const [minutesToGo, setMinutesToGo] = useState<number>(0)
   const [totalTodayLength, setTotalTodayLength] = useState<number>(0)
-  // const [storageSave, setStorageSave] = useState<boolean>(false)
-  // const [shouldStorageSave] = useDebounce(storageSave, 500)
 
-  const { data: habits, status } = useQuery(
-    'habitsDashboard',
-    getHabitsDashboard
+  const { data: habits, ...habitsQuery } = useHabits()
+  const { mutate: toggleHabit } = useToggleHabit()
+  const { mutate: submitNewHabit, isLoading: isCreatingHabit } = useCreateHabit(
+    habitsForToday
   )
 
   // loading and displaying habits to do for today
@@ -107,38 +97,6 @@ export const HabitsPage: React.FC = () => {
     }
   }, [habitsForToday, habits])
 
-  const [submitNewHabit, { status: newHabitStatus }] = useMutation(
-    createNewHabit,
-    {
-      onSuccess: data => {
-        // manually re-update todos in local storage
-        saveHabitsToStorage([...habitsForToday, { ...data, newestRep: 0 }])
-        enqueueSnackbar('Habit created', { variant: 'success' })
-      },
-      onError: (err: ErrorResponse) => {
-        enqueueSnackbar(err.response.data.message, { variant: 'error' })
-      },
-      onSettled: () => {
-        setDialogOpen(false)
-        queryCache.invalidateQueries('habitsDashboard')
-      },
-    }
-  )
-
-  const [toggleHabit] = useMutation(toggleHabitCheck, {
-    onSuccess: (_data, { lastCheckToday }) => {
-      enqueueSnackbar(lastCheckToday ? 'Habit unchecked' : 'Habit checked', {
-        variant: 'success',
-      })
-    },
-    onError: () => {
-      enqueueSnackbar('Cannot update repetitions', { variant: 'error' })
-    },
-    onSettled: () => {
-      queryCache.invalidateQueries('habitsDashboard')
-    },
-  })
-
   const colorsTaken = habits && habits.map(({ color }) => color)
   const progressValue =
     ((totalTodayLength - minutesToGo) / totalTodayLength) * 100
@@ -176,17 +134,23 @@ export const HabitsPage: React.FC = () => {
 
       <NewHabitDialog
         open={dialogOpen}
-        loading={newHabitStatus === 'loading'}
+        loading={isCreatingHabit}
         onClose={() => setDialogOpen(false)}
-        onSubmit={values => submitNewHabit(values)}
+        onSubmit={values =>
+          submitNewHabit(values, {
+            onSettled: () => {
+              setDialogOpen(false)
+            },
+          })
+        }
         colorsTaken={(colorsTaken ?? []) as HabitColor[]}
       />
 
       <PageTitle className="mt-4 mb-6">My habits</PageTitle>
 
-      {status === 'loading' ? (
-        <HabitItemSkeleton />
-      ) : status === 'success' ? (
+      {habitsQuery.isLoading && <HabitItemSkeleton />}
+      {habitsQuery.isError && <SomethingWentWrong />}
+      {habitsQuery.isSuccess &&
         habits!.map(habit => {
           const lastCheckIsToday = isToday(new Date(habit.newestRep))
 
@@ -205,10 +169,7 @@ export const HabitsPage: React.FC = () => {
               }
             />
           )
-        })
-      ) : (
-        <SomethingWentWrong />
-      )}
+        })}
 
       <Fab
         disabled={habits ? habits.length >= 5 : false}

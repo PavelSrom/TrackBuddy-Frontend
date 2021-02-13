@@ -1,32 +1,20 @@
-import React, { useState } from 'react'
-import { useSnackbar } from 'notistack'
+import React, { useState, useEffect } from 'react'
 import { Chip } from '@material-ui/core'
-import { useQuery, useMutation, queryCache } from 'react-query'
-import { getFullProfile, updateProfile } from '../api/profile'
 import { PageTitle } from '../styleguide/page-title'
-import { ErrorResponse } from '../types/error-response'
 import { TextField } from '../styleguide/text-field'
 import { Button } from '../styleguide/button'
+import { useProfileData, useUpdateProfile } from '../hooks/api/profile'
 
 export const DashboardPage: React.FC = () => {
-  const { enqueueSnackbar } = useSnackbar()
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState<string>('')
 
-  const { data: profile } = useQuery('profileData', getFullProfile, {
-    onSuccess: data => setTags(data.tags),
-  })
-  console.log(profile)
+  const { data: profile } = useProfileData()
+  const { mutate: update } = useUpdateProfile()
 
-  const [update] = useMutation(updateProfile, {
-    onSuccess: () => {
-      enqueueSnackbar('Profile updated', { variant: 'success' })
-      queryCache.invalidateQueries('profileData')
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-  })
+  useEffect(() => {
+    setTags(profile.tags)
+  }, [profile.tags])
 
   return (
     <>

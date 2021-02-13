@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMutation } from 'react-query'
-import { useSnackbar } from 'notistack'
 import { startOfDay, endOfDay, isToday } from 'date-fns'
 import enLocale from 'date-fns/locale/en-GB'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
-import { toggleHabitCheck } from '../../api/habits'
 import { ConfirmDialog } from '../confirm-dialog'
-import { ErrorResponse } from '../../types/error-response'
+import { useToggleHabit } from '../../hooks/api/habits'
 
 const dayIsCompleted = (reps: number[], day: Date): number | undefined => {
   return reps.find(
@@ -32,38 +29,32 @@ export const StreakDatepicker: React.FC<Props> = ({
   refetchReps,
 }) => {
   const { id } = useParams()
-  const { enqueueSnackbar } = useSnackbar()
   const [date, setDate] = useState<Date>(new Date())
   const [dayIsChecked, setDayIsChecked] = useState<boolean>(false)
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
-  const [togglePastChecks, { status }] = useMutation(toggleHabitCheck, {
-    onSuccess: (_data, { lastCheckToday }) => {
-      enqueueSnackbar(`Habit ${lastCheckToday ? 'unchecked' : 'checked'}`, {
-        variant: 'success',
-      })
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-    },
-    onSettled: () => {
-      setDialogOpen(false)
-      refetchReps?.()
-    },
-  })
+  const { mutate: togglePastChecks, isLoading: isToggling } = useToggleHabit()
 
   return (
     <>
       <ConfirmDialog
         open={dialogOpen}
-        loading={status === 'loading'}
+        loading={isToggling}
         onClose={() => setDialogOpen(false)}
         onConfirm={() =>
-          togglePastChecks({
-            id,
-            day: date.getTime(),
-            lastCheckToday: dayIsChecked,
-          })
+          togglePastChecks(
+            {
+              id,
+              day: date.getTime(),
+              lastCheckToday: dayIsChecked,
+            },
+            {
+              onSettled: () => {
+                setDialogOpen(false)
+                refetchReps?.()
+              },
+            }
+          )
         }
         description={`Are you sure you want to ${
           dayIsChecked ? 'uncheck' : 'check'

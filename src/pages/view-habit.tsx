@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
-import { useSnackbar } from 'notistack'
 import { IconButton, Chip } from '@material-ui/core'
 import Edit from '@material-ui/icons/Edit'
 import Delete from '@material-ui/icons/Delete'
 import { startOfMonth, endOfMonth } from 'date-fns'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, queryCache } from 'react-query'
-import { getHabitRepetitions, getHabitById, deleteHabit } from '../api/habits'
+import { useParams } from 'react-router-dom'
 import { StreakDatepicker } from '../styleguide/streak-datepicker'
-import { ErrorResponse } from '../types/error-response'
 import { ConfirmDialog } from '../styleguide/confirm-dialog'
 import { PageTitle } from '../styleguide/page-title'
-import { habitFrequency, saveHabitsToStorage } from '../utils/habit-utils'
+import { habitFrequency } from '../utils/habit-utils'
+import {
+  useDeleteHabit,
+  useHabitDetail,
+  useHabitReps,
+} from '../hooks/api/habits'
 
 type Range = {
   min: number
@@ -19,57 +20,37 @@ type Range = {
 }
 
 // TODO: custom spinner
-
 export const ViewHabit: React.FC = () => {
   const { id } = useParams()
-  const navigate = useNavigate()
-  const { enqueueSnackbar } = useSnackbar()
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [range, setRange] = useState<Range>({
     min: startOfMonth(new Date()).getTime(),
     max: endOfMonth(new Date()).getTime(),
   })
 
-  const { data: habitDetail, status: detailStatus } = useQuery(
-    ['habitDetail', id],
-    getHabitById
-  )
+  const { data: habitDetail, ...habitDetailQuery } = useHabitDetail(id)
+  const { data: reps, ...habitRepsQuery } = useHabitReps(id, range)
 
-  const [deleteThisHabit, { status }] = useMutation(deleteHabit, {
-    onSuccess: () => {
-      const habitsForToday = JSON.parse(
-        localStorage.getItem('trackbuddy-today') as string
-      )
-      // @ts-ignore
-      saveHabitsToStorage(habitsForToday.todos.filter(todo => todo._id !== id))
-      navigate('/habits')
-      enqueueSnackbar('Habit deleted', { variant: 'success' })
-    },
-    onError: (err: ErrorResponse) => {
-      enqueueSnackbar(err.response.data.message, { variant: 'error' })
-      setDialogOpen(false)
-    },
-  })
+  const {
+    mutate: deleteThisHabit,
+    isLoading: isDeletingHabit,
+  } = useDeleteHabit()
 
-  const { data: reps, refetch: refetchReps } = useQuery(
-    ['habitReps', id, range],
-    getHabitRepetitions,
-    {
-      onSuccess: data => {
-        queryCache.setQueryData(['habitReps', id], data)
-      },
-    }
-  )
-
-  if (detailStatus === 'loading') return <p>Loading...</p>
+  if (habitDetailQuery.isLoading) return <p>Loading...</p>
 
   return (
     <>
       <ConfirmDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        onConfirm={() => deleteThisHabit(id)}
-        loading={status === 'loading'}
+        onConfirm={() =>
+          deleteThisHabit(id, {
+            onSettled: () => {
+              setDialogOpen(false)
+            },
+          })
+        }
+        loading={isDeletingHabit}
       />
 
       <PageTitle className="mt-4 mb-6">{habitDetail!.name}</PageTitle>
@@ -109,7 +90,7 @@ export const ViewHabit: React.FC = () => {
       <StreakDatepicker
         reps={reps ?? []}
         allowPastEdits
-        refetchReps={() => refetchReps()}
+        refetchReps={() => habitRepsQuery.refetch()}
         onMonthChange={newDate => {
           setRange({
             min: startOfMonth(new Date(newDate as Date)).getTime(),

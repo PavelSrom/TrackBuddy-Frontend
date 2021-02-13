@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { queryCache } from 'react-query'
+import { useQueryClient } from 'react-query'
 import { useSnackbar } from 'notistack'
 import { Backdrop, CircularProgress } from '@material-ui/core'
 import { RegisterASP, LoginASP } from 'trackbuddy-shared/payloads/auth'
@@ -26,6 +26,7 @@ const AuthContext = React.createContext<ContextProps>({} as ContextProps)
 
 export const AuthProvider: React.FC = ({ children }) => {
   const { enqueueSnackbar } = useSnackbar()
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { width } = useDevice()
 
@@ -50,7 +51,8 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const logoutUser = (): void => {
     localStorage.removeItem('trackbuddy-token')
-    queryCache.clear()
+    queryClient.clear()
+
     setState({ isAuthenticated: false, status: 'success' })
     navigate('/login')
   }
