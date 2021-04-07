@@ -1,12 +1,21 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { useQuery, useMutation, useQueryClient } from 'react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+} from 'react-query'
 import { useSnackbar } from 'notistack'
 import { getFullProfile, getUsersTags, updateProfile } from '../../api/profile'
 import { ErrorResponse } from '../../types/error-response'
 
-export const useProfileData = () => useQuery('profileData', getFullProfile)
+// TODO: replace <any> with a type
 
-export const useTags = () => useQuery('usersTags', getUsersTags)
+export const useProfileData = (options?: UseQueryOptions<any>) =>
+  useQuery('profileData', getFullProfile, options)
+
+export const useTags = (options?: UseQueryOptions<any>) =>
+  useQuery('usersTags', getUsersTags, options)
 
 export const useUpdateProfile = () => {
   const { enqueueSnackbar } = useSnackbar()

@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { useSnackbar } from 'notistack'
-import { useQuery, useMutation, useQueryClient } from 'react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+} from 'react-query'
 import { useNavigate } from 'react-router-dom'
+import {
+  JournalBriefASR,
+  JournalFullASR,
+} from 'trackbuddy-shared/responses/journals'
 import {
   createNewJournal,
   getAllJournals,
@@ -14,16 +23,23 @@ import {
 import { ErrorResponse } from '../../types/error-response'
 import { Filters, initialFilters } from '../../utils/journal-filters'
 
-export const useJournals = (filters: Filters, enabled = false) =>
+export const useJournals = (
+  filters: Filters,
+  options?: UseQueryOptions<JournalBriefASR[]>
+) =>
   useQuery(['allJournals', filters], () => getAllJournals(filters), {
-    enabled,
+    enabled: options?.enabled || false,
+    ...options,
   })
 
-export const useTodayJournal = () =>
-  useQuery('journalMadeToday', journalMadeToday)
+export const useTodayJournal = (
+  options?: UseQueryOptions<{ found: boolean }>
+) => useQuery('journalMadeToday', journalMadeToday, options)
 
-export const useJournalById = (id: string) =>
-  useQuery(['getFullJournal', id], () => getJournalById(id))
+export const useJournalById = (
+  id: string,
+  options?: UseQueryOptions<JournalFullASR>
+) => useQuery(['getFullJournal', id], () => getJournalById(id), options)
 
 export const useCreateJournal = () => {
   const { enqueueSnackbar } = useSnackbar()

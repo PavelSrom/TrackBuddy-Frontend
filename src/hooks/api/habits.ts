@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { useSnackbar } from 'notistack'
-import { useQuery, useMutation, useQueryClient } from 'react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+} from 'react-query'
 import { useNavigate } from 'react-router-dom'
-import { HabitOverviewASR } from 'trackbuddy-shared/responses/habits'
+import {
+  HabitFullASR,
+  HabitOverviewASR,
+} from 'trackbuddy-shared/responses/habits'
 import {
   createNewHabit,
   deleteHabit,
@@ -14,10 +22,13 @@ import {
 import { ErrorResponse } from '../../types/error-response'
 import { saveHabitsToStorage } from '../../utils/habit-utils'
 
-export const useHabits = () => useQuery('habitsDashboard', getHabitsDashboard)
+export const useHabits = (options?: UseQueryOptions<HabitOverviewASR[]>) =>
+  useQuery('habitsDashboard', getHabitsDashboard, options)
 
-export const useHabitDetail = (id: string) =>
-  useQuery(['habitDetail', id], () => getHabitById(id))
+export const useHabitDetail = (
+  id: string,
+  options?: UseQueryOptions<HabitFullASR & { description: string }>
+) => useQuery(['habitDetail', id], () => getHabitById(id), options)
 
 export const useCreateHabit = (habitsForToday: HabitOverviewASR[]) => {
   const queryClient = useQueryClient()
@@ -82,7 +93,8 @@ export const useToggleHabit = () => {
 
 export const useHabitReps = (
   id: string,
-  range: { min: number; max: number }
+  range: { min: number; max: number },
+  options?: Omit<UseQueryOptions<number[]>, 'onSuccess'>
 ) => {
   const queryClient = useQueryClient()
 
@@ -90,6 +102,7 @@ export const useHabitReps = (
     ['habitReps', id, range],
     () => getHabitRepetitions(id, range),
     {
+      ...options,
       onSuccess: data => {
         queryClient.setQueryData(['habitReps', id], data)
       },
